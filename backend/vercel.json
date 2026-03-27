@@ -1,15 +1,12 @@
 {
-    "env": {
-        "PYTHONPATH": "src/"
-    },
-    "rewrites": [{
-        "source": "/(.*)",
-        "destination": "api/main.py"
-    }],
-    "functions": {
-        "api/main.py": {
-            "maxDuration": 30
-        }
-    },
-    "buildCommand": "pip3 install -r requirements.txt;"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "env": {
+    "PYTHONPATH": "src/"
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/main.py"
+    }
+  ]
 }
