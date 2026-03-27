@@ -1,9 +1,9 @@
-# W4lkies Monorepo
+# W4lkies
 
 ![W4lkies logo](frontend/public/img/logo.png)
 
-Monorepo for **w4lkies.com**.  
-Primary components:
+Monorepo for **w4lkies.com**. Primary components:
+
 - `frontend`: Next.js web application
 - `backend`: FastAPI API
 - `db`: PostgreSQL 16
@@ -12,12 +12,12 @@ Primary components:
 
 ### Services and Local URLs
 
-| Service | Container | Local URL / Access |
-|---|---|---|
-| Frontend (`frontend`) | `w4lkies-frontend` | `http://localhost:3000` |
-| API (`backend`) | `w4lkies-backend` | `http://localhost:8000` |
-| API docs | `w4lkies-backend` | `http://localhost:8000/docs` |
-| Postgres (`db`) | `w4lkies-database` | `postgresql://postgres:postgres@localhost:5432/w4lkies` |
+| Service               | Container          | Local URL / Access                                      |
+| --------------------- | ------------------ | ------------------------------------------------------- |
+| Frontend (`frontend`) | `w4lkies-frontend` | `http://localhost:3000`                                 |
+| API (`backend`)       | `w4lkies-backend`  | `http://localhost:8000`                                 |
+| API docs              | `w4lkies-backend`  | `http://localhost:8000/docs`                            |
+| Postgres (`db`)       | `w4lkies-database` | `postgresql://postgres:postgres@localhost:5432/w4lkies` |
 
 If ports are overridden with env vars (`FRONTEND_PORT`, `BACKEND_PORT`, `POSTGRES_PORT`), URLs change accordingly.
 
