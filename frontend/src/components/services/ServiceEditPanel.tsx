@@ -25,7 +25,7 @@ import {
 
 export interface ServiceFormState {
   name: string;
-  price: number;
+  price: number | null;
   description: string;
   duration: number | null;
   is_publicly_offered: boolean;
@@ -98,7 +98,14 @@ const ServiceEditPanel = ({
     });
   }, [mode, service, open]);
 
-  const parsedPrice = useMemo(() => Number.parseFloat(formData.price), [formData.price]);
+  const parsedPrice = useMemo(() => {
+    const trimmed = formData.price.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = Number.parseFloat(trimmed);
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [formData.price]);
   const parsedDuration = useMemo(() => {
     if (!formData.duration.trim()) {
       return null;
@@ -106,18 +113,26 @@ const ServiceEditPanel = ({
     return Number.parseFloat(formData.duration);
   }, [formData.duration]);
 
+  const isDurationValid = parsedDuration === null || (Number.isFinite(parsedDuration) && parsedDuration > 0);
+  const isCreateValid =
+    formData.name.trim().length >= 2 &&
+    formData.description.trim().length >= 4 &&
+    parsedPrice !== null &&
+    parsedPrice >= 0 &&
+    isDurationValid;
+  const isEditValid = formData.name.trim().length > 0 && (parsedPrice === null || parsedPrice >= 0) && isDurationValid;
+
   const isFormValid = useMemo(
-    () =>
-      formData.name.trim().length >= 2 &&
-      formData.description.trim().length >= 4 &&
-      Number.isFinite(parsedPrice) &&
-      parsedPrice >= 0 &&
-      (parsedDuration === null || (Number.isFinite(parsedDuration) && parsedDuration > 0)),
-    [formData, parsedPrice, parsedDuration]
+    () => (mode === "create" ? isCreateValid : isEditValid),
+    [mode, isCreateValid, isEditValid]
   );
 
   const handleSave = async () => {
-    if (!isFormValid || !Number.isFinite(parsedPrice)) {
+    if (!isFormValid) {
+      return;
+    }
+
+    if (mode === "create" && parsedPrice === null) {
       return;
     }
 
