@@ -46,3 +46,6 @@ pnpm-debug.log*
 tmp/
 .tmp/
 
+
+# local db dumps
+backend/data/
