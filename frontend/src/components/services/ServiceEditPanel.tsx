@@ -110,17 +110,54 @@ const ServiceEditPanel = ({
     if (!formData.duration.trim()) {
       return null;
     }
-    return Number.parseFloat(formData.duration);
+    const parsed = Number.parseFloat(formData.duration);
+    return Number.isFinite(parsed) ? parsed : null;
   }, [formData.duration]);
 
-  const isDurationValid = parsedDuration === null || (Number.isFinite(parsedDuration) && parsedDuration > 0);
+  const baselineForm = useMemo<ServiceDraftState>(() => {
+    if (mode === "create" || !service) {
+      return EMPTY_FORM;
+    }
+
+    return {
+      name: service.name || "",
+      price: service.price != null ? service.price.toString() : "",
+      description: service.description || "",
+      duration: service.duration != null ? service.duration.toString() : "",
+      is_publicly_offered: service.is_publicly_offered,
+      is_active: service.is_active,
+    };
+  }, [mode, service]);
+
+  const hasPriceParseError = formData.price.trim().length > 0 && parsedPrice === null;
+  const hasDurationParseError = formData.duration.trim().length > 0 && parsedDuration === null;
+  const isDurationValid = parsedDuration === null || parsedDuration >= 0;
   const isCreateValid =
     formData.name.trim().length >= 2 &&
     formData.description.trim().length >= 4 &&
     parsedPrice !== null &&
-    parsedPrice >= 0 &&
+    !hasPriceParseError &&
+    !hasDurationParseError &&
     isDurationValid;
-  const isEditValid = formData.name.trim().length > 0 && (parsedPrice === null || parsedPrice >= 0) && isDurationValid;
+  const isEditValid =
+    formData.name.trim().length > 0 &&
+    (parsedPrice === null || Number.isFinite(parsedPrice)) &&
+    !hasPriceParseError &&
+    !hasDurationParseError &&
+    isDurationValid;
+
+  const isDirty = useMemo(() => {
+    const normalize = (value: string) => value.trim();
+
+    return (
+      normalize(formData.name) !== normalize(baselineForm.name) ||
+      normalize(formData.price) !== normalize(baselineForm.price) ||
+      normalize(formData.description) !== normalize(baselineForm.description) ||
+      normalize(formData.duration) !== normalize(baselineForm.duration) ||
+      formData.is_publicly_offered !== baselineForm.is_publicly_offered ||
+      formData.is_active !== baselineForm.is_active
+    );
+  }, [formData, baselineForm]);
 
   const isFormValid = useMemo(
     () => (mode === "create" ? isCreateValid : isEditValid),
@@ -176,7 +213,6 @@ const ServiceEditPanel = ({
               type="number"
               inputMode="decimal"
               step="0.01"
-              min="0"
               value={formData.price}
               onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
               className="pl-10"
@@ -255,7 +291,7 @@ const ServiceEditPanel = ({
       <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
         Cancel
       </Button>
-      <Button type="button" onClick={handleSave} disabled={isSaving || !isFormValid}>
+      <Button type="button" onClick={handleSave} disabled={isSaving || !isDirty || !isFormValid}>
         {isSaving ? "Saving..." : mode === "create" ? "Create Service" : "Save Changes"}
       </Button>
     </div>
