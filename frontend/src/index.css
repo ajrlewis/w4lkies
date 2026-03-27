@@ -1,0 +1,68 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :root {
+    --primary: rgba(255, 154, 54, 1.0);        /* Main brand orange */
+    --secondary: rgba(147, 191, 176, 1.0);     /* Brand teal */
+    --accent: rgba(255, 104, 0, 1.0);          /* Accent orange */
+    --text-primary: rgba(47, 72, 88, 1.0);     /* Dark blue-gray for main text */
+    --text-secondary: rgba(100, 116, 139, 1.0); /* Muted text */
+    --text-on-primary: rgba(255, 255, 255, 1.0); /* White text on primary backgrounds */
+    --bg-primary: rgba(255, 255, 255, 1.0);    /* Main background */
+    --bg-secondary: rgba(249, 250, 251, 1.0);  /* Card/section backgrounds */
+    --bg-muted: rgba(243, 244, 246, 1.0);      /* Subtle background variations */
+    --border: rgba(229, 231, 235, 1.0);        /* Borders and dividers */
+    --border-muted: rgba(243, 244, 246, 1.0);  /* Subtle borders */
+  }
+
+  .dark {
+    --primary: rgba(255, 154, 54, 1.0);        /* Consistent brand orange */
+    --secondary: rgba(100, 150, 140, 1.0);     /* Darker teal */
+    --accent: rgba(255, 104, 0, 1.0);          /* Accent orange */
+    --text-primary: rgba(248, 250, 252, 1.0);  /* Light text */
+    --text-secondary: rgba(160, 160, 160, 1.0); /* Muted light text */
+    --text-on-primary: rgba(255, 255, 255, 1.0); /* White text on primary backgrounds */
+    --bg-primary: rgba(15, 23, 42, 1.0);       /* Dark background */
+    --bg-secondary: rgba(30, 41, 59, 1.0);     /* Card/section backgrounds */
+    --bg-muted: rgba(51, 65, 85, 1.0);         /* Subtle background variations */
+    --border: rgba(71, 85, 105, 1.0);          /* Borders and dividers */
+    --border-muted: rgba(51, 65, 85, 1.0);     /* Subtle borders */
+  }
+}
+
+@layer components {
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

@@ -1,0 +1,12 @@
+fastapi[standard]
+SQLAlchemy
+alembic
+psycopg2-binary
+pydantic-settings
+bcrypt
+PyJWT
+loguru
+jinja2
+reportlab
+pytest
+pytest-cov

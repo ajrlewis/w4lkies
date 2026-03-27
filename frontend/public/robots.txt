@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+# Everything is allowed for all crawlers
+
+Sitemap: https://w4lkies.com/sitemap.xml

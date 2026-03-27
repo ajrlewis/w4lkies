@@ -1,0 +1,52 @@
+{% extends "emails/base.html" %}
+
+{% block main %}
+  <h2>👤📋 Customer Information 👤📋</h2>
+  <table>
+    <tr>
+      <td>
+        <p>Customer Name:</p>
+        <p>{{ customer.name }}</p>
+        <p>Customer Phone:</p>
+        <p>{{ customer.phone }}</p>
+        <p>Customer Email:</p>
+        <p><a href="mailto:{{ customer.email }}">{{ customer.email }}</a></p>
+        <p>Customer Emergency Contact Name:</p>
+        <p>{{ customer.emergency_contact_name }}</p>
+        <p>Customer Emergency Contact Phone:</p>
+        <p>{{ customer.emergency_contact_phone }}</p>
+      </td>
+    </tr>
+  </table>
+  <h2>🐾🐶 Dog Information 🐾🐶</h2>
+  <table>
+    {% for dog in dogs %}
+      <tr>
+        <td>
+          <p>Name:</p>
+          <p>{{ dog.name }}</p>
+          <p>Breed:</p>
+          <p>{{ dog.breed }}</p>
+          <p>Date of Birth:</p>
+          <p>{{ dog.date_of_birth }}</p>
+          <p>Vet:</p>
+          <p>{{ dog.vet_name }}, {{ dog.vet_address }}</p>
+          <p>Is allowed treats?</p>
+          <p>{{ dog.is_allowed_treats }}</p>
+          <p>Is allowed off the lead?</p>
+          <p>{{ dog.is_allowed_off_the_lead }}</p>
+          <p>Is allowed on Instagram (@w4lkies) or this website (w4lkies.com)?</p>
+          <p>{{ dog.is_allowed_on_social_media }}</p>
+          <p>Is neutered or spayed?</p>
+          <p>{{ dog.is_neutered_or_spayed }}</p>
+          <p>Behavioral Issues:</p>
+          <p>{{ dog.behavioral_issues }}</p>
+          <p>Medical Needs:</p>
+          <p>{{ dog.medical_needs }}</p>
+        </td>
+      </tr>
+
+      
+    {% endfor %}
+  </table>
+{% endblock main %}

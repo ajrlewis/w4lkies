@@ -1,0 +1,11 @@
+
+{
+    "callback": "https://livingroomofsatoshi.com/api/v1/lnurl/payreq/f3f6950f-4c01-4e3e-b2a3-6358efadc723",
+    "maxSendable": 100000000000,
+    "minSendable": 1000,
+    "metadata": "[[\"text/plain\",\"Pay to Wallet of Satoshi user: macabreicon76\"],[\"text/identifier\",\"macabreicon76@walletofsatoshi.com\"]]",
+    "commentAllowed": 255,
+    "tag": "payRequest",
+    "allowsNostr": true,
+    "nostrPubkey": "be1d89794bf92de5dd64c1e60f6a2c70c140abac9932418fee30c5c637fe9479"
+}
