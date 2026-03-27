@@ -1,6 +1,6 @@
 
 import { Customer, Service, Booking, UpcomingBooking, PaginationInfo } from '@/types/interfaces';
-import { apiRequest } from './apiService';
+import { apiRequest, buildApiUrl } from './apiService';
 
 // Helper function to fetch active customers
 export const fetchActiveCustomers = async (): Promise<Customer[]> => {
@@ -40,7 +40,7 @@ export const fetchUpcomingBookings = async (queryParams?: Record<string, string>
   console.log("Making API request to:", endpoint);
   
   // Make the API request and extract pagination from headers
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"}${endpoint}`, {
+  const response = await fetch(buildApiUrl(endpoint), {
     headers: {
       "Authorization": `Bearer ${localStorage.getItem("token")}`,
       "Content-Type": "application/json",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { toast } from "@/components/ui/sonner";
-import { apiRequest } from "@/api/apiService";
+import { apiRequest, buildApiUrl } from "@/api/apiService";
 import { fetchActiveCustomers } from "@/api/commonRequests";
 import { User, Customer, GroupedBooking, EnhancedBooking, PaginationInfo } from "@/types/interfaces";
 
@@ -134,7 +134,7 @@ export const useBookingHistoryData = () => {
         console.log("Making API request to:", endpoint);
         
         // Make the API request and extract pagination from headers
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"}${endpoint}`, {
+        const response = await fetch(buildApiUrl(endpoint), {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",

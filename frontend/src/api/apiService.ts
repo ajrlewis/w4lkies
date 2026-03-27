@@ -1,7 +1,16 @@
 
 import { toast } from "@/components/ui/sonner";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
+const rawApiBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
+export const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, "");
+
+export const buildApiUrl = (endpoint: string): string => {
+  const normalizedEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
+  return `${API_BASE_URL}${normalizedEndpoint}`;
+};
 
 // Helper to get token from localStorage
 const getToken = () => localStorage.getItem("token");
@@ -23,7 +32,7 @@ export const apiRequest = async <T>(
   }
   
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(buildApiUrl(endpoint), {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,
@@ -81,7 +90,7 @@ export const apiRequestWithResponse = async <T>(
   }
   
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(buildApiUrl(endpoint), {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,

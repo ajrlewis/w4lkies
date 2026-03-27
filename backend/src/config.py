@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     MAIL_FROM_NAME: str = os.getenv("MAIL_DEFAULT_SENDER_NAME", "")
     MAIL_PORT: int = os.getenv("MAIL_PORT", 587)
     ALLOW_ORIGINS: str = os.getenv("ALLOW_ORIGINS", "http://127.0.0.1:8080")
+    ALLOW_ORIGIN_REGEX: str = os.getenv("ALLOW_ORIGIN_REGEX", "")
 
 
 settings = Settings()

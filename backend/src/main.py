@@ -42,10 +42,13 @@ logger.debug("Mounting static directory ...")
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 logger.debug("Adding CORS middleware ...")
-allow_origins = settings.ALLOW_ORIGINS.split(",")
+allow_origins = [
+    origin.strip() for origin in settings.ALLOW_ORIGINS.split(",") if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
+    allow_origin_regex=settings.ALLOW_ORIGIN_REGEX or None,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-Pagination"],

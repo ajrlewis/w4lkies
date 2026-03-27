@@ -1,6 +1,6 @@
 
 import { Invoice } from '@/types/interfaces';
-import { apiRequest, apiRequestWithResponse } from './apiService';
+import { apiRequest, apiRequestWithResponse, buildApiUrl } from './apiService';
 
 interface FetchInvoicesOptions {
   page?: number;
@@ -50,7 +50,7 @@ export const downloadInvoice = async (id: number): Promise<Blob> => {
     throw new Error(`Invalid invoice ID for download: ${id}`);
   }
   
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"}/invoices/${id}/download`, {
+  const response = await fetch(buildApiUrl(`/invoices/${id}/download`), {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
