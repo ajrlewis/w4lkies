@@ -3,8 +3,10 @@ import { Calendar as CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdditionalDate {
   id: string;
@@ -34,6 +36,16 @@ const AdditionalDatesSection = ({
   onUpdateAdditionalTime,
   onDatePickerOpenChange,
 }: AdditionalDatesSectionProps) => {
+  const isMobile = useIsMobile();
+
+  const parseDateFromInput = (value: string) => {
+    if (!value) {
+      return undefined;
+    }
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
@@ -57,29 +69,43 @@ const AdditionalDatesSection = ({
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Date</label>
-                  <Popover
-                    open={additionalDate.isDatePickerOpen}
-                    onOpenChange={(isOpen) => onDatePickerOpenChange(additionalDate.id, isOpen)}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn("w-full justify-start border-border bg-background pl-3 text-left font-normal text-foreground")}
-                      >
-                        {additionalDate.date ? format(additionalDate.date, "PPP") : <span>Pick a date</span>}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto border-border bg-popover p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={additionalDate.date}
-                        onSelect={(date) => date && onUpdateAdditionalDate(additionalDate.id, date)}
-                        initialFocus
-                        className={cn("pointer-events-auto p-3")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  {isMobile ? (
+                    <Input
+                      type="date"
+                      value={additionalDate.date ? format(additionalDate.date, "yyyy-MM-dd") : ""}
+                      onChange={(event) => {
+                        const selectedDate = parseDateFromInput(event.target.value);
+                        if (selectedDate) {
+                          onUpdateAdditionalDate(additionalDate.id, selectedDate);
+                        }
+                      }}
+                      className="border-border bg-background text-foreground"
+                    />
+                  ) : (
+                    <Popover
+                      open={additionalDate.isDatePickerOpen}
+                      onOpenChange={(isOpen) => onDatePickerOpenChange(additionalDate.id, isOpen)}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn("w-full justify-start border-border bg-background pl-3 text-left font-normal text-foreground")}
+                        >
+                          {additionalDate.date ? format(additionalDate.date, "PPP") : <span>Pick a date</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto border-border bg-popover p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={additionalDate.date}
+                          onSelect={(date) => date && onUpdateAdditionalDate(additionalDate.id, date)}
+                          initialFocus
+                          className={cn("pointer-events-auto p-3")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
 
                 <div className="space-y-2">
