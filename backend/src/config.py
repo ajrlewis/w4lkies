@@ -3,6 +3,23 @@ import os
 from loguru import logger
 from pydantic_settings import BaseSettings
 
+DEFAULT_ALLOW_ORIGINS = ",".join(
+    [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://w4lkies.com",
+        "https://www.w4lkies.com",
+    ]
+)
+DEFAULT_ALLOW_ORIGIN_REGEX = r"^https://w4lkies-frontend(?:-[a-z0-9-]+)*\.vercel\.app$"
+
+
+def _get_env_or_default(name: str, default: str) -> str:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip() or default
+
 
 class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URI: str = os.getenv(
@@ -23,8 +40,10 @@ class Settings(BaseSettings):
     MAIL_DEFAULT_SENDER_NAME: str = os.getenv("MAIL_DEFAULT_SENDER_NAME", "")
     MAIL_FROM_NAME: str = os.getenv("MAIL_DEFAULT_SENDER_NAME", "")
     MAIL_PORT: int = os.getenv("MAIL_PORT", 587)
-    ALLOW_ORIGINS: str = os.getenv("ALLOW_ORIGINS", "http://127.0.0.1:8080")
-    ALLOW_ORIGIN_REGEX: str = os.getenv("ALLOW_ORIGIN_REGEX", "")
+    ALLOW_ORIGINS: str = _get_env_or_default("ALLOW_ORIGINS", DEFAULT_ALLOW_ORIGINS)
+    ALLOW_ORIGIN_REGEX: str = _get_env_or_default(
+        "ALLOW_ORIGIN_REGEX", DEFAULT_ALLOW_ORIGIN_REGEX
+    )
 
 
 settings = Settings()
