@@ -165,8 +165,6 @@ def _draw_bill_to_block(pdf: canvas.Canvas, invoice, width: float, y_top: float)
         text_y,
         f"Service Period: {_format_date(invoice.date_start)} to {_format_date(invoice.date_end)}",
     )
-    text_y -= 0.2 * inch
-    pdf.drawString(text_x, text_y, f"Currency: {invoice_currency}")
     return box_y - 0.2 * inch
 
 
