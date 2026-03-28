@@ -132,17 +132,6 @@ const ContactSection = () => {
                 </span>
                 @w4lkies
               </a>
-              <a
-                href="https://primal.net/p/nprofile1qqsyk2jgg2rafm3yzqtwz4pwl634hn9s6y4ulhhdvkfucrmxh9wuwlcz0hkmz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-xl border border-transparent px-2 py-2 text-sm text-foreground transition hover:border-primary/30 hover:bg-primary/10"
-              >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary text-base">
-                  𓅦
-                </span>
-                npub1fv4y...mxaaf3
-              </a>
             </div>
           </div>
         </div>

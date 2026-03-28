@@ -63,15 +63,6 @@ export const dogs = [
     owner: "Amie F.",
     images: ["/img/dog-billy-01.png", "/img/dog-billy-02.png", "/img/dog-billy-03.png"],
   },
-  {
-    id: 7,
-    name: "Jeff",
-    breed: "Cocker Spaniel",
-    testimonial:
-      "Sophia is an absolute star! As an owner of an anxious dog, finding the right person to trust with Jeff was crucial. Sophia has been absolutely amazing - she truly understands and adapts to Jeff's needs, showing incredible patience and genuine care. She's more than just a dog walker; she's become someone we completely trust. We recently used her boarding service and couldn't have been more relaxed knowing Jeff was in caring hands. If you're looking for someone who'll treat your dog like their own, Sophia's the dog walker for you!",
-    owner: "Victoria G.",
-    images: ["/img/dog-jeff-01.png", "/img/dog-jeff-02.png"],
-  },
 ];
 
 const DogsSection = () => (
