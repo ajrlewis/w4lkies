@@ -17,6 +17,14 @@ export interface BookingFilterOptionsResponse {
   customers: BookingFilterCustomer[];
 }
 
+export interface BookingCreatePayload {
+  date: string;
+  time: string;
+  customer_id: number;
+  service_id: number;
+  user_id: number;
+}
+
 const buildBookingsQuery = (options: FetchBookingsOptions = {}) => {
   const params = new URLSearchParams();
   if (options.page) params.set("page", options.page.toString());
@@ -62,6 +70,10 @@ export const updateBooking = async (
   payload: { date: string; time: string; user_id: number; customer_id: number }
 ) => {
   return await apiRequest(`/bookings/${bookingId}`, "PUT", payload);
+};
+
+export const createBooking = async (payload: BookingCreatePayload) => {
+  return await apiRequest("/bookings", "POST", payload);
 };
 
 export const deleteBooking = async (bookingId: number) => {

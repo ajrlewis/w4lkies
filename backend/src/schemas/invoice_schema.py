@@ -43,6 +43,20 @@ class InvoiceGenerateSchema(BaseModel):
     customer_id: int
 
 
+class InvoiceGenerateAllSchema(BaseModel):
+    date_start: datetime
+    date_end: datetime
+
+
+class InvoiceGenerateAllResultSchema(BaseModel):
+    date_start: datetime
+    date_end: datetime
+    customers_with_bookings: int
+    invoices_generated: int
+    skipped_customers: int
+    invoice_ids: list[int]
+
+
 class InvoiceUpdateSchema(BaseModel):
     name: Union[str, None] = None
     price: Union[float, None] = None

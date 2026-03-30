@@ -1,15 +1,15 @@
 from typing import Optional
 
-import bcrypt
-from loguru import logger
 from fastapi import Response
+from loguru import logger
 from sqlalchemy.exc import IntegrityError
 
 from database import SessionLocal
-from models import User
 from exceptions import ConflictError, DatabaseError, NotFoundError
-from schemas.user_schema import UserCreateSchema, UserUpdateSchema
+from models import User
 from schemas.pagination_schema import PaginationParamsSchema
+from schemas.user_schema import UserCreateSchema, UserUpdateSchema
+from services import password_service
 from pagination import paginate
 
 
@@ -63,9 +63,7 @@ def add_user(db: SessionLocal, current_user: User, user_data: UserCreateSchema) 
     if get_user_by_email(db, email):
         raise ConflictError("A user with this email already exists.")
 
-    password_hash = bcrypt.hashpw(
-        user_data.password.encode("utf-8"), bcrypt.gensalt()
-    ).decode("utf-8")
+    password_hash = password_service.hash_password(user_data.password)
 
     user = User(
         name=username,
@@ -90,6 +88,56 @@ def add_user(db: SessionLocal, current_user: User, user_data: UserCreateSchema) 
         db.rollback()
         logger.error(f"Error creating user: {e}")
         raise DatabaseError("An error occurred while creating a user.")
+
+
+def change_current_user_password(
+    db: SessionLocal,
+    current_user: User,
+    current_password: str,
+    new_password: str,
+) -> None:
+    try:
+        user = get_user_by_id(db, current_user.user_id)
+        if not password_service.verify_password(current_password, user.password_hash):
+            raise ConflictError("Current password is incorrect.")
+        if password_service.verify_password(new_password, user.password_hash):
+            raise ConflictError("New password must be different from the current password.")
+
+        user.password_hash = password_service.hash_password(new_password)
+        user.updated_by = current_user.user_id
+        db.commit()
+    except NotFoundError:
+        raise
+    except ConflictError:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error changing current user password: {e}")
+        raise DatabaseError("An error occurred while changing the password.")
+
+
+def reset_user_password_by_id(
+    db: SessionLocal,
+    current_user: User,
+    user_id: int,
+    new_password: str,
+) -> None:
+    try:
+        user = get_user_by_id(db, user_id)
+        if password_service.verify_password(new_password, user.password_hash):
+            raise ConflictError("New password must be different from the current password.")
+
+        user.password_hash = password_service.hash_password(new_password)
+        user.updated_by = current_user.user_id
+        db.commit()
+    except NotFoundError:
+        raise
+    except ConflictError:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error resetting user password: {e}")
+        raise DatabaseError("An error occurred while resetting the password.")
 
 
 def update_user_by_id(

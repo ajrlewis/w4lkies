@@ -36,7 +36,9 @@ def get_booking_time_choices(
     return time_choices
 
 
-def get_booking_filter_options(db: SessionLocal, view_mode: str = "upcoming") -> dict:
+def get_booking_filter_options(
+    db: SessionLocal, view_mode: str = "upcoming", user_id: Optional[int] = None
+) -> dict:
     date_min = None
     date_max = None
     today = datetime.now().date()
@@ -59,6 +61,9 @@ def get_booking_filter_options(db: SessionLocal, view_mode: str = "upcoming") ->
     if date_max:
         users_query = users_query.filter(Booking.date < date_max)
         customers_query = customers_query.filter(Booking.date < date_max)
+    if user_id:
+        users_query = users_query.filter(Booking.user_id == user_id)
+        customers_query = customers_query.filter(Booking.user_id == user_id)
 
     users = [
         {"user_id": user_id, "username": username}

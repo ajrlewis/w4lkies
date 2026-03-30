@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FormLabel } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Service } from "@/types/interfaces";
 
@@ -19,9 +19,9 @@ const ExtraServicesSection = ({
 }: ExtraServicesSectionProps) => {
   return (
     <div className="space-y-4">
-      <FormLabel className="text-sm font-semibold uppercase tracking-wide text-foreground">
+      <Label className="text-sm font-semibold uppercase tracking-wide text-foreground">
         Extra Services (Optional)
-      </FormLabel>
+      </Label>
 
       {extraServiceIds.length > 0 && (
         <div className="space-y-2">

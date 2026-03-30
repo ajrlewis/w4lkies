@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import InvoiceCard from "@/components/invoices/InvoiceCard";
 import InvoiceGeneratePanel from "@/components/invoices/InvoiceGeneratePanel";
 import InvoiceAggregateChart from "@/components/invoices/InvoiceAggregateChart";
+import DashboardBreadcrumbs from "@/components/dashboard/DashboardBreadcrumbs";
+import DashboardToolbar from "@/components/dashboard/DashboardToolbar";
 import PaginationInfo from "@/components/pagination/PaginationInfo";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearchReset } from "@/hooks/useSearchReset";
@@ -116,15 +117,22 @@ const Invoices = () => {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:py-6">
         <div className="mb-5 sm:mb-6">
           <div>
-            <Link to="/dashboard" className="mb-2 inline-flex items-center text-sm font-medium text-accent hover:underline">
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Dashboard
-            </Link>
+            <DashboardBreadcrumbs section="operations" current="Invoices" />
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Invoices</h1>
           </div>
         </div>
 
-        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <DashboardToolbar
+          rightClassName="sm:flex-wrap lg:flex-nowrap"
+          action={
+            isAdmin ? (
+              <Button onClick={() => setIsGenerateOpen(true)} className="h-10">
+                <Plus className="mr-1 h-4 w-4" />
+                Add Invoice
+              </Button>
+            ) : null
+          }
+        >
           <div className="inline-flex w-full items-center gap-3 rounded-xl border border-border/70 bg-muted/30 p-1 sm:w-auto">
             <ToggleGroup
               type="single"
@@ -151,52 +159,43 @@ const Invoices = () => {
             </ToggleGroup>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-            {viewMode === "list" ? (
-              <>
-                <Input
-                  placeholder="Search invoices..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full sm:w-64"
-                />
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Status</span>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as InvoiceStatusFilter)}
-                    className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
-                  >
-                    <option value="all">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                  </select>
-                </label>
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Per page</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
-                  >
-                    {pageSizeOptions.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </>
-            ) : null}
-
-            {isAdmin && (
-              <Button onClick={() => setIsGenerateOpen(true)} className="h-10">
-                <Plus className="mr-1 h-4 w-4" />
-                Add Invoice
-              </Button>
-            )}
-          </div>
-        </div>
+          {viewMode === "list" ? (
+            <>
+              <Input
+                placeholder="Search invoices..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full sm:w-64"
+              />
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Status</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as InvoiceStatusFilter)}
+                  className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
+                >
+                  <option value="all">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Per page</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
+                >
+                  {pageSizeOptions.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : null}
+        </DashboardToolbar>
 
         {viewMode === "list" && isLoading && (
           <div className="flex items-center justify-center py-8">

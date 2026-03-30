@@ -3,10 +3,21 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from cruds import user_crud
-from dependencies import GetDBDep, GetCurrentUserDep, GetCurrentAdminUserDep
+from dependencies import (
+    GetCurrentActiveUserDep,
+    GetCurrentAdminUserDep,
+    GetCurrentUserDep,
+    GetDBDep,
+)
 from exceptions import ConflictError, DatabaseError, NotFoundError
 from schemas.pagination_schema import PaginationParamsSchema
-from schemas.user_schema import UserCreateSchema, UserSchema, UserUpdateSchema
+from schemas.user_schema import (
+    UserChangePasswordSchema,
+    UserCreateSchema,
+    UserResetPasswordSchema,
+    UserSchema,
+    UserUpdateSchema,
+)
 
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
@@ -59,6 +70,28 @@ async def read_users_me(db: GetDBDep, current_user: GetCurrentUserDep) -> UserSc
     return current_user
 
 
+@user_router.put("/me/password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_my_password(
+    db: GetDBDep,
+    current_user: GetCurrentActiveUserDep,
+    password_data: UserChangePasswordSchema,
+) -> Response:
+    try:
+        user_crud.change_current_user_password(
+            db,
+            current_user,
+            current_password=password_data.current_password,
+            new_password=password_data.new_password,
+        )
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except ConflictError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except DatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
 @user_router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def create_user(
     db: GetDBDep,
@@ -71,6 +104,34 @@ async def create_user(
         return user
     except ConflictError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except DatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@user_router.put("/{user_id}/password", status_code=status.HTTP_204_NO_CONTENT)
+async def reset_user_password(
+    db: GetDBDep,
+    current_user: GetCurrentAdminUserDep,
+    user_id: int,
+    password_data: UserResetPasswordSchema,
+) -> Response:
+    if current_user.user_id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Use /users/me/password to change your own password.",
+        )
+
+    try:
+        user_crud.reset_user_password_by_id(
+            db, current_user, user_id, password_data.new_password
+        )
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ConflictError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except DatabaseError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)

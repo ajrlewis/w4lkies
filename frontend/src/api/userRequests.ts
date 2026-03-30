@@ -27,6 +27,11 @@ export interface UserCreatePayload {
   is_active?: boolean;
 }
 
+export interface ChangeMyPasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
 interface FetchUsersOptions {
   page?: number;
   page_size?: number;
@@ -56,4 +61,10 @@ export const updateUser = async (
 
 export const createUser = async (data: UserCreatePayload): Promise<User> => {
   return await apiRequest<User>("/users", "POST", data);
+};
+
+export const changeMyPassword = async (
+  data: ChangeMyPasswordPayload
+): Promise<void> => {
+  return await apiRequest<void>("/users/me/password", "PUT", data);
 };

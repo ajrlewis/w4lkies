@@ -23,9 +23,24 @@ const BookingManagementCard = ({
   onEdit,
   onRequestDelete,
 }: BookingManagementCardProps) => {
+  const dogNamesLabel =
+    booking.dog_names && booking.dog_names.length > 0
+      ? booking.dog_names.join(", ")
+      : booking.customer_name;
+  const vetSummary =
+    booking.vet_names && booking.vet_names.length > 0
+      ? booking.vet_names.length === 1
+        ? `Vet: ${booking.vet_names[0]}`
+        : `Vets: ${booking.vet_names.length}`
+      : null;
+  const metaParts = [
+    ...(booking.dog_names && booking.dog_names.length > 0 ? [`Customer: ${booking.customer_name}`] : []),
+    ...(vetSummary ? [vetSummary] : []),
+  ];
+
   return (
     <ManagementCard
-      title={`${booking.time} · ${booking.customer_name}`}
+      title={`${booking.time} · ${dogNamesLabel}`}
       subtitle={
         <span className="inline-flex items-center gap-1">
           <UserRound className="h-4 w-4 text-muted-foreground" />
@@ -72,6 +87,9 @@ const BookingManagementCard = ({
         </div>
       }
     >
+      {metaParts.length > 0 ? (
+        <p className="mb-1 text-xs text-muted-foreground">{metaParts.join(" · ")}</p>
+      ) : null}
       <p className="text-sm text-foreground/80">
         {booking.service_name}
         {booking.extra_services && booking.extra_services.length > 0

@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, RotateCcw, SlidersHorizontal, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Plus, RotateCcw, SlidersHorizontal, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import AppNavbar from "@/components/AppNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import DashboardBreadcrumbs from "@/components/dashboard/DashboardBreadcrumbs";
+import DashboardToolbar from "@/components/dashboard/DashboardToolbar";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -32,6 +34,7 @@ import BookingCreatePanel from "@/components/bookings/BookingCreatePanel";
 import BookingEditPanel from "@/components/bookings/BookingEditPanel";
 import BookingManagementCard from "@/components/bookings/BookingManagementCard";
 import {
+  createBooking,
   deleteBooking,
   fetchBookingFilterOptions,
   fetchBookingHistoryPaginated,
@@ -40,9 +43,12 @@ import {
   type BookingFilterCustomer,
   type BookingFilterUser,
 } from "@/api/bookingRequests";
+import { fetchDogs } from "@/api/dogRequests";
 import { usePagination } from "@/hooks/usePagination";
+import { useActiveServices } from "@/hooks/useActiveServices";
 import {
   DEFAULT_PAGINATION,
+  type Dog,
   type EnhancedBooking,
   type GroupedBooking,
   type PaginationInfo as PaginationInfoType,
@@ -90,11 +96,17 @@ const Bookings = () => {
   }>({
     queryKey: ["bookings-filter-options", viewMode],
     queryFn: () => fetchBookingFilterOptions(viewMode),
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAuthenticated,
   });
 
   const users = filterOptions?.users ?? [];
   const customers = filterOptions?.customers ?? [];
+  const { data: services = [] } = useActiveServices();
+  const { data: dogs = [] } = useQuery<Dog[]>({
+    queryKey: ["booking-dogs"],
+    queryFn: fetchDogs,
+    enabled: isAuthenticated && isAdmin,
+  });
 
   useEffect(() => {
     if (userFilter !== "all" && !users.some((user) => user.user_id.toString() === userFilter)) {
@@ -123,7 +135,7 @@ const Bookings = () => {
       userFilter,
       customerFilter,
     ],
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAuthenticated,
     queryFn: async () => {
       const bookingOptions = {
         page: currentPage,
@@ -160,19 +172,56 @@ const Bookings = () => {
     }
   }, [currentPage, paginationInfo.total_pages]);
 
-  const updateBookingMutation = useMutation({
+  const saveBookingMutation = useMutation({
     mutationFn: async ({
-      bookingIds,
+      bookingIdsToUpdate,
+      bookingIdsToDelete,
       payload,
+      additionalServiceIds,
     }: {
-      bookingIds: number[];
+      bookingIdsToUpdate: number[];
+      bookingIdsToDelete: number[];
       payload: { date: string; time: string; user_id: number; customer_id: number };
+      additionalServiceIds: number[];
     }) => {
-      await Promise.all(bookingIds.map((bookingId) => updateBooking(bookingId, payload)));
-      return bookingIds.length;
+      if (bookingIdsToUpdate.length > 0) {
+        await Promise.all(bookingIdsToUpdate.map((bookingId) => updateBooking(bookingId, payload)));
+      }
+      if (bookingIdsToDelete.length > 0) {
+        await Promise.all(bookingIdsToDelete.map((bookingId) => deleteBooking(bookingId)));
+      }
+      const uniqueServiceIds = Array.from(
+        new Set(additionalServiceIds.filter((serviceId) => Number.isInteger(serviceId) && serviceId > 0))
+      );
+
+      if (uniqueServiceIds.length > 0) {
+        await Promise.all(
+          uniqueServiceIds.map((serviceId) =>
+            createBooking({
+              date: payload.date,
+              time: payload.time,
+              customer_id: payload.customer_id,
+              user_id: payload.user_id,
+              service_id: serviceId,
+            })
+          )
+        );
+      }
+
+      return {
+        updatedCount: bookingIdsToUpdate.length,
+        removedCount: bookingIdsToDelete.length,
+        addedCount: uniqueServiceIds.length,
+      };
     },
-    onSuccess: (count) => {
-      toast.success(count > 1 ? `Updated ${count} bookings` : "Booking updated");
+    onSuccess: ({ updatedCount, removedCount, addedCount }) => {
+      if (removedCount > 0 || addedCount > 0) {
+        toast.success(
+          `Updated ${updatedCount} booking${updatedCount > 1 ? "s" : ""}, removed ${removedCount} service${removedCount > 1 ? "s" : ""}, and added ${addedCount} service${addedCount > 1 ? "s" : ""}.`
+        );
+      } else {
+        toast.success(updatedCount > 1 ? `Updated ${updatedCount} bookings` : "Booking updated");
+      }
       setIsEditOpen(false);
       setSelectedBooking(null);
       queryClient.invalidateQueries({ queryKey: ["bookings-management"] });
@@ -211,6 +260,8 @@ const Bookings = () => {
     time: string;
     user_id: number;
     customer_id: number;
+    additional_service_ids: number[];
+    remove_booking_ids: number[];
   }) => {
     if (!selectedBooking) {
       return;
@@ -222,7 +273,40 @@ const Bookings = () => {
       toast.error("No valid booking IDs found.");
       return;
     }
-    await updateBookingMutation.mutateAsync({ bookingIds, payload });
+    const updatePayload = {
+      date: payload.date,
+      time: payload.time,
+      user_id: payload.user_id,
+      customer_id: payload.customer_id,
+    };
+    const requestedRemovalIds = Array.from(
+      new Set(payload.remove_booking_ids.filter((bookingId) => bookingIds.includes(bookingId)))
+    );
+    const bookingIdsToUpdate = bookingIds.filter((bookingId) => !requestedRemovalIds.includes(bookingId));
+    const currentServiceNames = [
+      selectedBooking.service_name,
+      ...(selectedBooking.extra_services || []),
+    ];
+    const activeServiceNames = new Set<string>(
+      currentServiceNames
+        .filter((_, index) => !requestedRemovalIds.includes(bookingIds[index]))
+        .map((serviceName) => serviceName.trim().toLowerCase())
+    );
+    const additionalServiceIds = payload.additional_service_ids.filter((serviceId) => {
+      const serviceName = services.find((service) => service.service_id === serviceId)?.name;
+      return !serviceName || !activeServiceNames.has(serviceName.trim().toLowerCase());
+    });
+    if (bookingIdsToUpdate.length + additionalServiceIds.length === 0) {
+      toast.error("A booking must have at least one service.");
+      return;
+    }
+
+    await saveBookingMutation.mutateAsync({
+      bookingIdsToUpdate,
+      bookingIdsToDelete: requestedRemovalIds,
+      payload: updatePayload,
+      additionalServiceIds,
+    });
   };
 
   const pageSizeOptions = [12, 24, 48].filter((size) => {
@@ -231,6 +315,62 @@ const Bookings = () => {
   const hasActiveFilters = userFilter !== "all" || customerFilter !== "all";
   const selectedUserLabel = users.find((user) => user.user_id.toString() === userFilter)?.username;
   const selectedCustomerLabel = customers.find((customer) => customer.customer_id.toString() === customerFilter)?.name;
+  const dogNamesByCustomer = useMemo(() => {
+    const names = new Map<number, string[]>();
+
+    dogs.forEach((dog) => {
+      if (!dog.customer_id) {
+        return;
+      }
+      const current = names.get(dog.customer_id) ?? [];
+      if (!current.includes(dog.name)) {
+        current.push(dog.name);
+      }
+      names.set(dog.customer_id, current);
+    });
+
+    return names;
+  }, [dogs]);
+  const vetNamesByCustomer = useMemo(() => {
+    const names = new Map<number, string[]>();
+
+    dogs.forEach((dog) => {
+      if (!dog.customer_id) {
+        return;
+      }
+
+      const vetName = dog.vet?.name?.trim() || (dog.vet_id ? `Vet #${dog.vet_id}` : "");
+      if (!vetName) {
+        return;
+      }
+
+      const current = names.get(dog.customer_id) ?? [];
+      if (!current.includes(vetName)) {
+        current.push(vetName);
+      }
+      names.set(dog.customer_id, current);
+    });
+
+    return names;
+  }, [dogs]);
+  const bookingsWithDogs = useMemo<GroupedBooking[]>(
+    () =>
+      groupedBookings.map((group) => ({
+        ...group,
+        bookings: group.bookings.map((booking) => ({
+          ...booking,
+          dog_names:
+            typeof booking.customer_id === "number"
+              ? dogNamesByCustomer.get(booking.customer_id)
+              : undefined,
+          vet_names:
+            typeof booking.customer_id === "number"
+              ? vetNamesByCustomer.get(booking.customer_id)
+              : undefined,
+        })),
+      })),
+    [groupedBookings, dogNamesByCustomer, vetNamesByCustomer]
+  );
 
   if (!isAuthenticated) {
     return null;
@@ -242,24 +382,23 @@ const Bookings = () => {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:py-6">
         <div className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Link
-              to="/dashboard"
-              className="mb-2 inline-flex items-center text-sm font-medium text-accent hover:underline"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Dashboard
-            </Link>
+            <DashboardBreadcrumbs section="operations" current="Bookings" />
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Bookings</h1>
           </div>
         </div>
 
-        {!isAdmin ? (
-          <Card className="rounded-xl border border-border/70 bg-card p-5 text-center text-muted-foreground">
-            You do not have permission to manage bookings.
-          </Card>
-        ) : (
-          <>
-            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <>
+            <DashboardToolbar
+              rightClassName="sm:flex-wrap lg:flex-nowrap"
+              action={
+                isAdmin ? (
+                <Button className="h-10 sm:w-auto" onClick={() => setIsCreateOpen(true)}>
+                  <Plus className="mr-1 h-4 w-4" />
+                  Add Booking
+                </Button>
+                ) : null
+              }
+            >
               <div className="inline-flex w-full items-center gap-3 rounded-xl border border-border/70 bg-muted/30 p-1 sm:w-auto">
                 <ToggleGroup
                   type="single"
@@ -286,35 +425,29 @@ const Bookings = () => {
                 </ToggleGroup>
               </div>
 
-              <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-                <Input
-                  placeholder="Search bookings..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full sm:w-64"
-                />
-                <label className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 text-sm text-muted-foreground sm:min-w-[170px]">
-                  <span>Per page</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="h-10 bg-transparent text-foreground outline-none"
-                  >
-                    {pageSizeOptions.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <Input
+                placeholder="Search bookings..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full sm:w-64"
+              />
+              <label className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 text-sm text-muted-foreground sm:min-w-[170px]">
+                <span>Per page</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="h-10 bg-transparent text-foreground outline-none"
+                >
+                  {pageSizeOptions.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </DashboardToolbar>
 
-                <Button className="h-10 sm:w-auto" onClick={() => setIsCreateOpen(true)}>
-                  <Plus className="mr-1 h-4 w-4" />
-                  Add Booking
-                </Button>
-              </div>
-            </div>
-
+            {isAdmin ? (
             <Card className="mb-5 rounded-xl border-border/70 bg-card/80 p-4 sm:mb-6">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -407,6 +540,7 @@ const Bookings = () => {
                 </div>
               ) : null}
             </Card>
+            ) : null}
 
             {isLoading && (
               <div className="flex items-center justify-center py-8">
@@ -420,15 +554,15 @@ const Bookings = () => {
               </div>
             )}
 
-            {!isLoading && !isError && groupedBookings.length === 0 && (
+            {!isLoading && !isError && bookingsWithDogs.length === 0 && (
               <div className="py-8 text-center text-muted-foreground">
                 No {viewMode === "upcoming" ? "upcoming" : "historical"} bookings found.
               </div>
             )}
 
-            {!isLoading && !isError && groupedBookings.length > 0 && (
+            {!isLoading && !isError && bookingsWithDogs.length > 0 && (
               <div className="space-y-5 sm:space-y-6">
-                {groupedBookings.map((group) => (
+                {bookingsWithDogs.map((group) => (
                   <Card key={group.date} className="rounded-xl border-border/70 bg-card/80 p-4 sm:p-5">
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <h2 className="text-base font-semibold text-foreground sm:text-lg">{group.formattedDate}</h2>
@@ -463,20 +597,21 @@ const Bookings = () => {
                 />
               </div>
             )}
-          </>
-        )}
+        </>
       </main>
 
-      <BookingCreatePanel
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onCreated={handleCreated}
-      />
+      {isAdmin ? (
+        <BookingCreatePanel
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+          onCreated={handleCreated}
+        />
+      ) : null}
 
       <BookingEditPanel
         open={isEditOpen}
         booking={selectedBooking}
-        isSaving={updateBookingMutation.isPending}
+        isSaving={saveBookingMutation.isPending}
         onOpenChange={(open) => {
           setIsEditOpen(open);
           if (!open) {

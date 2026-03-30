@@ -20,7 +20,7 @@ const Index = () => {
       <ServicesSection />
       <SectionNavigation targetId="team" label="Meet Our Team" />
       <TeamSection />
-      <SectionNavigation targetId="testimonials" label="See Testimonials" />
+      <SectionNavigation targetId="happy-dogs" label="See Happy Dogs" />
       <DogsSection />
       <ContactSection />
       <Footer />

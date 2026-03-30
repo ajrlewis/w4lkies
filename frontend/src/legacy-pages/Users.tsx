@@ -9,8 +9,7 @@ import {
   UserCreatePayload,
   UserUpdatePayload,
 } from "@/api/userRequests";
-import { ArrowLeft, PencilLine, Plus, ShieldCheck, ShieldX } from "lucide-react";
-import { Link } from "react-router-dom";
+import { PencilLine, Plus, ShieldCheck, ShieldX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +19,8 @@ import { toast } from "@/components/ui/sonner";
 import { User } from "@/types/interfaces";
 import UserEditPanel, { type UserFormState } from "@/components/users/UserEditPanel";
 import ManagementCard from "@/components/admin/ManagementCard";
+import DashboardBreadcrumbs from "@/components/dashboard/DashboardBreadcrumbs";
+import DashboardToolbar from "@/components/dashboard/DashboardToolbar";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationInfo from "@/components/pagination/PaginationInfo";
 import { DEFAULT_PAGINATION, type PaginationInfo as PaginationInfoType } from "@/types/interfaces";
@@ -139,20 +140,25 @@ const Users = () => {
     <div className="flex min-h-screen flex-col bg-background transition-colors duration-200">
       <AppNavbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:py-6">
-        <div className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link
-              to="/dashboard"
-              className="mb-2 inline-flex items-center text-sm font-medium text-accent hover:underline"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Users</h1>
-          </div>
-
-          {isAdmin && (
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+        <DashboardToolbar
+          className="mb-5 sm:mb-6"
+          left={
+            <div>
+              <DashboardBreadcrumbs section="management" current="Users" />
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Users</h1>
+            </div>
+          }
+          action={
+            isAdmin ? (
+              <Button onClick={openCreatePanel} className="h-10">
+                <Plus className="mr-1 h-4 w-4" />
+                Add User
+              </Button>
+            ) : null
+          }
+        >
+          {isAdmin ? (
+            <>
               <Input
                 placeholder="Search users..."
                 value={searchInput}
@@ -173,13 +179,9 @@ const Users = () => {
                   ))}
                 </select>
               </label>
-              <Button onClick={openCreatePanel} className="h-10">
-                <Plus className="mr-1 h-4 w-4" />
-                Add User
-              </Button>
-            </div>
-          )}
-        </div>
+            </>
+          ) : null}
+        </DashboardToolbar>
 
         {!isAdmin && (
           <Card className="rounded-xl border border-border/70 bg-card p-5 text-center text-muted-foreground">

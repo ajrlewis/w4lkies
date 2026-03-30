@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class UserSnippetSchema(BaseModel):
@@ -24,6 +24,21 @@ class UserUpdateSchema(BaseModel):
     email: Optional[str] = Field(default=None, min_length=3, max_length=255)
     is_admin: Optional[bool] = None
     is_active: Optional[bool] = None
+
+
+class UserChangePasswordSchema(BaseModel):
+    current_password: str = Field(min_length=6, max_length=128)
+    new_password: str = Field(min_length=6, max_length=128)
+
+    @model_validator(mode="after")
+    def validate_new_password_differs(self):
+        if self.current_password == self.new_password:
+            raise ValueError("New password must be different from the current password.")
+        return self
+
+
+class UserResetPasswordSchema(BaseModel):
+    new_password: str = Field(min_length=6, max_length=128)
 
 
 class UserSchema(UserBaseSchema):

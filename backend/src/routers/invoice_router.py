@@ -7,6 +7,8 @@ from cruds import invoice_crud
 from dependencies import GetDBDep, GetCurrentAdminUserDep
 from exceptions import DatabaseError, NotFoundError
 from schemas.invoice_schema import (
+    InvoiceGenerateAllResultSchema,
+    InvoiceGenerateAllSchema,
     InvoiceSchema,
     InvoiceGenerateSchema,
 )
@@ -87,6 +89,24 @@ async def generate_invoice(
         return invoice
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except DatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
+
+
+@invoice_router.post("/generate/all", response_model=InvoiceGenerateAllResultSchema)
+async def generate_invoices_for_all_customers(
+    db: GetDBDep,
+    current_user: GetCurrentAdminUserDep,
+    data: InvoiceGenerateAllSchema,
+):
+    """Generates invoices for all customers with uninvoiced bookings in a date range."""
+    try:
+        result = invoice_crud.generate_invoices_for_all_customers(
+            db, current_user, data.date_start, data.date_end
+        )
+        return result
     except DatabaseError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)

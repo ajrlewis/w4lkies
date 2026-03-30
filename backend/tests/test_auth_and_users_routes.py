@@ -1,5 +1,6 @@
 import pytest
 import httpx
+from uuid import uuid4
 
 pytestmark = pytest.mark.anyio
 
@@ -116,3 +117,139 @@ async def test_update_user_prevents_self_demotion(
         json={"is_active": False},
     )
     assert deactivate_self.status_code == 400
+
+
+async def _create_user_for_password_tests(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+) -> dict:
+    username = f"pwd_user_{uuid4().hex[:8]}"
+    initial_password = "initial123"
+    response = await async_client.post(
+        "/users/",
+        headers=admin_headers,
+        json={
+            "username": username,
+            "email": f"{username}@example.com",
+            "password": initial_password,
+            "is_admin": False,
+            "is_active": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    return {
+        "user_id": response.json()["user_id"],
+        "username": username,
+        "password": initial_password,
+    }
+
+
+async def _login(
+    async_client: httpx.AsyncClient, username: str, password: str
+) -> httpx.Response:
+    return await async_client.post(
+        "/auth/token",
+        data={"username": username, "password": password},
+    )
+
+
+async def test_change_my_password_success(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    user_info = await _create_user_for_password_tests(async_client, admin_headers)
+    login_response = await _login(
+        async_client, user_info["username"], user_info["password"]
+    )
+    assert login_response.status_code == 200
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    change_response = await async_client.put(
+        "/users/me/password",
+        headers=headers,
+        json={
+            "current_password": user_info["password"],
+            "new_password": "updated123",
+        },
+    )
+    assert change_response.status_code == 204
+
+    old_password_login = await _login(
+        async_client, user_info["username"], user_info["password"]
+    )
+    assert old_password_login.status_code == 401
+
+    new_password_login = await _login(async_client, user_info["username"], "updated123")
+    assert new_password_login.status_code == 200
+
+
+async def test_change_my_password_rejects_wrong_current_password(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    user_info = await _create_user_for_password_tests(async_client, admin_headers)
+    login_response = await _login(
+        async_client, user_info["username"], user_info["password"]
+    )
+    assert login_response.status_code == 200
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    change_response = await async_client.put(
+        "/users/me/password",
+        headers=headers,
+        json={
+            "current_password": "wrong-current-password",
+            "new_password": "updated123",
+        },
+    )
+    assert change_response.status_code == 400
+    assert change_response.json()["detail"] == "Current password is incorrect."
+
+    login_with_original = await _login(
+        async_client, user_info["username"], user_info["password"]
+    )
+    assert login_with_original.status_code == 200
+
+
+async def test_admin_reset_user_password_success(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    user_info = await _create_user_for_password_tests(async_client, admin_headers)
+
+    reset_response = await async_client.put(
+        f"/users/{user_info['user_id']}/password",
+        headers=admin_headers,
+        json={"new_password": "adminreset123"},
+    )
+    assert reset_response.status_code == 204
+
+    old_password_login = await _login(
+        async_client, user_info["username"], user_info["password"]
+    )
+    assert old_password_login.status_code == 401
+
+    new_password_login = await _login(
+        async_client, user_info["username"], "adminreset123"
+    )
+    assert new_password_login.status_code == 200
+
+
+async def test_admin_reset_user_password_requires_admin(
+    async_client: httpx.AsyncClient, user_headers: dict[str, str]
+):
+    response = await async_client.put(
+        "/users/3/password",
+        headers=user_headers,
+        json={"new_password": "somepass123"},
+    )
+    assert response.status_code == 403
+
+
+async def test_admin_reset_user_password_rejects_self(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    response = await async_client.put(
+        "/users/1/password",
+        headers=admin_headers,
+        json={"new_password": "somepass123"},
+    )
+    assert response.status_code == 400

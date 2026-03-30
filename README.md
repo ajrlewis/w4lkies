@@ -10,6 +10,8 @@ Monorepo for **w4lkies.com**. Primary components:
 
 ## Local Development (Docker-First)
 
+Run commands from the repository root (`w4lkies/`) where `docker-compose.yml` lives, or pass `-f /absolute/path/to/docker-compose.yml`.
+
 ### Services and Local URLs
 
 | Service               | Container          | Local URL / Access                                      |
@@ -51,6 +53,32 @@ docker compose ps
 docker compose logs -f frontend backend db
 ```
 
+### Live Reload Dev Mode (No Rebuild Per Code Change)
+
+Use the `dev` profile services to get hot reload for frontend and backend while editing local files.
+
+```bash
+# Start database
+docker compose up -d db
+
+# Start dev API + frontend (hot reload)
+docker compose --profile dev up -d backend-dev frontend-dev
+
+# Follow logs
+docker compose logs -f backend-dev frontend-dev
+```
+
+Dev URLs:
+
+- Frontend dev: `http://localhost:3001`
+- API dev: `http://localhost:8001`
+- API docs dev: `http://localhost:8001/docs`
+
+Notes:
+
+- Frontend and backend source are bind-mounted into containers, so HTML/JS/TS/Python edits apply without rebuilding images.
+- The existing `frontend` and `backend` services remain production-style image runs.
+
 ## Common Commands
 
 ### Migrations
@@ -72,4 +100,13 @@ docker compose run --rm backend pytest -q
 
 ```bash
 docker compose exec db psql -U postgres -d w4lkies
+```
+
+### Dangling Images and Build Cache
+
+Rebuilding images creates old, untagged layers by design. Clean them periodically:
+
+```bash
+docker image prune -f
+docker builder prune -f
 ```

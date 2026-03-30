@@ -4,15 +4,11 @@ from __future__ import annotations
 import argparse
 from datetime import date, datetime, time, timedelta, timezone
 
-import bcrypt
 from sqlalchemy import text
 
 from database import SessionLocal
 from models import Booking, Customer, Dog, Expense, Invoice, Service, User, Vet
-
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+from services import password_service
 
 
 def utc_now_naive() -> datetime:
@@ -113,7 +109,7 @@ def seed_database(db: SessionLocal) -> None:
         user_id=1,
         name="admin",
         email="admin@w4lkies.local",
-        password_hash=hash_password("admin123"),
+        password_hash=password_service.hash_password("admin123"),
         is_admin=True,
         is_active=True,
         created_by=1,
@@ -126,7 +122,7 @@ def seed_database(db: SessionLocal) -> None:
         user_id=2,
         name="alice",
         email="alice@w4lkies.local",
-        password_hash=hash_password("alice123"),
+        password_hash=password_service.hash_password("alice123"),
         is_admin=False,
         is_active=True,
         created_by=admin.user_id,
@@ -136,7 +132,7 @@ def seed_database(db: SessionLocal) -> None:
         user_id=3,
         name="bob",
         email="bob@w4lkies.local",
-        password_hash=hash_password("bob123"),
+        password_hash=password_service.hash_password("bob123"),
         is_admin=False,
         is_active=True,
         created_by=admin.user_id,
@@ -262,31 +258,13 @@ def seed_database(db: SessionLocal) -> None:
     db.add_all([dog_1, dog_2])
     db.flush()
 
-    invoice_1 = Invoice(
-        invoice_id=1,
-        date_start=date.today() - timedelta(days=7),
-        date_end=date.today(),
-        date_issued=date.today(),
-        date_due=date.today() + timedelta(days=14),
-        date_paid=None,
-        price_subtotal=66.0,
-        price_discount=0.0,
-        price_total=66.0,
-        customer_id=customer_1.customer_id,
-        reference="INV-0001",
-        created_by=admin.user_id,
-        updated_by=admin.user_id,
-    )
-    db.add(invoice_1)
-    db.flush()
-
     booking_1 = Booking(
         booking_id=1,
         date=date.today() + timedelta(days=1),
         time=time(9, 30),
         customer_id=customer_1.customer_id,
         service_id=service_1.service_id,
-        invoice_id=invoice_1.invoice_id,
+        invoice_id=None,
         user_id=staff_1.user_id,
         created_by=admin.user_id,
         updated_by=admin.user_id,
@@ -303,6 +281,29 @@ def seed_database(db: SessionLocal) -> None:
         updated_by=admin.user_id,
     )
     db.add_all([booking_1, booking_2])
+    db.flush()
+
+    # Create invoice and explicitly link booking(s) back to invoice_id so
+    # download/PDF flows can always resolve invoice -> bookings.
+    invoice_1 = Invoice(
+        invoice_id=1,
+        date_start=date.today() - timedelta(days=7),
+        date_end=date.today(),
+        date_issued=date.today(),
+        date_due=date.today() + timedelta(days=14),
+        date_paid=None,
+        price_subtotal=service_1.price,
+        price_discount=0.0,
+        price_total=service_1.price,
+        customer_id=customer_1.customer_id,
+        reference="INV-0001",
+        bookings=[booking_1],
+        created_by=admin.user_id,
+        updated_by=admin.user_id,
+    )
+    db.add(invoice_1)
+    db.flush()
+    booking_1.invoice_id = invoice_1.invoice_id
     db.flush()
 
     expense_1 = Expense(

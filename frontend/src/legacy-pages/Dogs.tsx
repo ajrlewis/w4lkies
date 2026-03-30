@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, PencilLine, Plus, ShieldCheck, ShieldX, Trash2, UserRound } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Calendar, PencilLine, Plus, ShieldCheck, ShieldX, Trash2, UserRound } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import type { Dog } from "@/types/interfaces";
 import ManagementCard from "@/components/admin/ManagementCard";
+import DashboardBreadcrumbs from "@/components/dashboard/DashboardBreadcrumbs";
+import DashboardToolbar from "@/components/dashboard/DashboardToolbar";
 import DogEditPanel, { type DogFormState } from "@/components/dogs/DogEditPanel";
 import {
   AlertDialog,
@@ -191,48 +192,44 @@ const Dogs = () => {
     <div className="flex min-h-screen flex-col bg-background transition-colors duration-200">
       <AppNavbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:py-6">
-        <div className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link
-              to="/dashboard"
-              className="mb-2 inline-flex items-center text-sm font-medium text-accent hover:underline"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dogs</h1>
-          </div>
-
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-            <Input
-              placeholder="Search dogs..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full sm:w-64"
-            />
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Per page</span>
-              <select
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
-              >
-                {pageSizeOptions.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {isAdmin && (
+        <DashboardToolbar
+          className="mb-5 sm:mb-6"
+          left={
+            <div>
+              <DashboardBreadcrumbs section="directory" current="Dogs" />
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dogs</h1>
+            </div>
+          }
+          action={
+            isAdmin ? (
               <Button onClick={openCreatePanel} className="h-10">
                 <Plus className="mr-1 h-4 w-4" />
                 Add Dog
               </Button>
-            )}
-          </div>
-        </div>
+            ) : null
+          }
+        >
+          <Input
+            placeholder="Search dogs..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full sm:w-64"
+          />
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Per page</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+        </DashboardToolbar>
 
         {isLoading && (
           <div className="flex items-center justify-center py-8">

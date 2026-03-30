@@ -101,6 +101,8 @@ export interface EnhancedBooking {
   user_id?: number;
   customer_name: string;
   customer_id?: number;
+  dog_names?: string[];
+  vet_names?: string[];
   service_name: string;
   extra_services?: string[];
   date: string;

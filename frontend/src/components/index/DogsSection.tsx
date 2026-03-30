@@ -66,12 +66,12 @@ export const dogs = [
 ];
 
 const DogsSection = () => (
-  <section id="testimonials" className="relative overflow-hidden bg-background px-4 py-20 sm:px-6">
+  <section id="happy-dogs" className="relative overflow-hidden bg-background px-4 py-20 sm:px-6">
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(149,188,172,0.2),transparent_35%),radial-gradient(circle_at_88%_24%,rgba(255,153,74,0.2),transparent_33%)]" />
 
     <div className="relative mx-auto max-w-6xl">
       <div className="mx-auto mb-12 max-w-3xl text-center">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Testimonials</p>
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Happy Dogs</p>
         <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
           Real stories from happy dogs and their humans
         </h2>

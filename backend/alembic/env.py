@@ -23,7 +23,9 @@ import models  # noqa: F401,E402
 
 target_metadata = Base.metadata
 
-database_url = os.getenv("SQLALCHEMY_DATABASE_URI")
+database_url = os.getenv("SQLALCHEMY_DATABASE_URI") or os.getenv("POSTGRES_URL")
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 

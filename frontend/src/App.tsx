@@ -21,6 +21,7 @@ import Invoices from "./legacy-pages/Invoices";
 import Expenses from "./legacy-pages/Expenses";
 import PayUs from "./legacy-pages/PayUs"; 
 import PaymentSuccess from "./legacy-pages/PaymentSuccess";
+import Account from "./legacy-pages/Account";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -57,44 +58,50 @@ const App = () => (
             } />
 
             <Route path="/dashboard/users" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Users />
               </ProtectedRoute>
             } />
             
             <Route path="/dashboard/vets" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Vets />
               </ProtectedRoute>
             } />
             
             <Route path="/dashboard/customers" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Customers />
               </ProtectedRoute>
             } />
             
             <Route path="/dashboard/dogs" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Dogs />
               </ProtectedRoute>
             } />
             
             <Route path="/dashboard/services" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Services />
               </ProtectedRoute>
             } />
             
             <Route path="/dashboard/invoices" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Invoices />
               </ProtectedRoute>
             } />
             
             <Route path="/dashboard/expenses" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <Expenses />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/dashboard/account" element={
+              <ProtectedRoute>
+                <Account />
               </ProtectedRoute>
             } />
             

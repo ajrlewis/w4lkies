@@ -9,6 +9,15 @@ interface FetchInvoicesOptions {
   search?: string;
 }
 
+export interface GenerateAllInvoicesResult {
+  date_start: string;
+  date_end: string;
+  customers_with_bookings: number;
+  invoices_generated: number;
+  skipped_customers: number;
+  invoice_ids: number[];
+}
+
 // Fetch all invoices
 export const fetchInvoices = async (): Promise<Invoice[]> => {
   return await apiRequest<Invoice[]>('/invoices');
@@ -41,6 +50,16 @@ export const generateInvoice = async (customerId: number, dateStart: string, dat
     customer_id: customerId,
     date_start: dateStart,
     date_end: dateEnd
+  });
+};
+
+export const generateInvoicesForAllCustomers = async (
+  dateStart: string,
+  dateEnd: string
+): Promise<GenerateAllInvoicesResult> => {
+  return await apiRequest<GenerateAllInvoicesResult>('/invoices/generate/all', 'POST', {
+    date_start: dateStart,
+    date_end: dateEnd,
   });
 };
 

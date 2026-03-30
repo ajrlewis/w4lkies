@@ -44,7 +44,11 @@ async def read_booking_filter_options(
 ) -> BookingFilterOptionsSchema:
     """Returns users/customers that actually have bookings in the selected view."""
     try:
-        options = booking_crud.get_booking_filter_options(db, view_mode=view)
+        options = booking_crud.get_booking_filter_options(
+            db,
+            view_mode=view,
+            user_id=None if current_user.is_admin else current_user.user_id,
+        )
         return options
     except DatabaseError as e:
         raise HTTPException(
@@ -70,11 +74,12 @@ async def read_upcoming_bookings(
 ) -> list[BookingSnippetSchema]:
     """Reads and returns all upcoming bookings from the database."""
     try:
+        effective_user_id = current_user.user_id if not current_user.is_admin else user_id
         bookings = booking_crud.get_upcoming_bookings(
             db,
             pagination_params=pagination_params,
             response=response,
-            user_id=user_id,
+            user_id=effective_user_id,
             customer_id=customer_id,
             search=search,
         )
@@ -103,11 +108,12 @@ async def read_historic_bookings(
 ) -> list[BookingSnippetSchema]:
     """Reads and returns all historic bookings from the database."""
     try:
+        effective_user_id = current_user.user_id if not current_user.is_admin else user_id
         bookings = booking_crud.get_historic_bookings(
             db,
             pagination_params=pagination_params,
             response=response,
-            user_id=user_id,
+            user_id=effective_user_id,
             customer_id=customer_id,
             search=search,
         )
@@ -152,6 +158,11 @@ async def read_booking(
     """Reads and returns a specific booking from the database."""
     try:
         booking = booking_crud.get_booking_by_id(db, booking_id)
+        if not current_user.is_admin and booking.user_id != current_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
         return booking
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

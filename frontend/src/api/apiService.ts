@@ -23,12 +23,14 @@ export const apiRequest = async <T>(
 ): Promise<T> => {
   const token = getToken();
   
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
+  const headers: HeadersInit = {};
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
   }
   
   try {
@@ -81,12 +83,14 @@ export const apiRequestWithResponse = async <T>(
 ): Promise<{ data: T; response: Response }> => {
   const token = getToken();
   
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
+  const headers: HeadersInit = {};
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
   }
   
   try {

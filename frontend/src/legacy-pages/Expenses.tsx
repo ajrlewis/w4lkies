@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Calendar, PencilLine, Plus, Tags, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Calendar, PencilLine, Plus, Tags, Trash2 } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +14,8 @@ import { toast } from "@/components/ui/sonner";
 import ManagementCard from "@/components/admin/ManagementCard";
 import ExpenseEditPanel, { type ExpenseFormState } from "@/components/expenses/ExpenseEditPanel";
 import ExpenseAggregateChart from "@/components/expenses/ExpenseAggregateChart";
+import DashboardBreadcrumbs from "@/components/dashboard/DashboardBreadcrumbs";
+import DashboardToolbar from "@/components/dashboard/DashboardToolbar";
 import PaginationInfo from "@/components/pagination/PaginationInfo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -217,18 +218,22 @@ const Expenses = () => {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:py-6">
         <div className="mb-5 sm:mb-6">
           <div>
-            <Link
-              to="/dashboard"
-              className="mb-2 inline-flex items-center text-sm font-medium text-accent hover:underline"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Dashboard
-            </Link>
+            <DashboardBreadcrumbs section="operations" current="Expenses" />
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Expenses</h1>
           </div>
         </div>
 
-        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <DashboardToolbar
+          rightClassName="sm:flex-wrap lg:flex-nowrap"
+          action={
+            isAdmin ? (
+              <Button onClick={openCreatePanel} className="h-10">
+                <Plus className="mr-1 h-4 w-4" />
+                Add Expense
+              </Button>
+            ) : null
+          }
+        >
           <div className="inline-flex w-full items-center gap-3 rounded-xl border border-border/70 bg-muted/30 p-1 sm:w-auto">
             <ToggleGroup
               type="single"
@@ -255,40 +260,31 @@ const Expenses = () => {
             </ToggleGroup>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-            {viewMode === "list" ? (
-              <>
-                <Input
-                  placeholder="Search expenses..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full sm:w-64"
-                />
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Per page</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
-                  >
-                    {pageSizeOptions.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </>
-            ) : null}
-
-            {isAdmin && (
-              <Button onClick={openCreatePanel} className="h-10">
-                <Plus className="mr-1 h-4 w-4" />
-                Add Expense
-              </Button>
-            )}
-          </div>
-        </div>
+          {viewMode === "list" ? (
+            <>
+              <Input
+                placeholder="Search expenses..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full sm:w-64"
+              />
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Per page</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="h-10 rounded-md border border-border bg-background px-3 text-foreground"
+                >
+                  {pageSizeOptions.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : null}
+        </DashboardToolbar>
 
         {viewMode === "list" && isLoading && (
           <div className="flex items-center justify-center py-8">
