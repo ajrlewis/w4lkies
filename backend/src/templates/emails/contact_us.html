@@ -1,15 +1,44 @@
 {% extends "emails/base.html" %}
 
+{% block subject_title %}W4lkies Contact Us Message{% endblock %}
+{% block preheader %}A new contact message was submitted via W4lkies.{% endblock %}
+{% block eyebrow %}Contact Request{% endblock %}
+{% block heading %}New Contact Message{% endblock %}
+{% block lead %}
+  You received a new message from the website contact form.
+{% endblock %}
+
 {% block main %}
-  <p>
-  You have new notification!
-  <p>
-  <table>
-    <tr><td style="font-weight: bold;">Name:</td></tr>
-    <tr><td>{{ name }}</td></tr>
-    <tr><td style="font-weight: bold;">Email:</td></tr>
-    <tr><td>{{ email }}</td></tr>
-    <tr><td style="font-weight: bold;">Message:</td></tr>
-    <tr><td>{{ message }}</dt></tr>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border:1px solid #f1e6da; border-radius:16px; background-color:#fffaf4;">
+    <tr>
+      <td style="padding:18px 18px 8px 18px;">
+        <p style="margin:0; font-size:14px; line-height:20px; font-weight:700; color:#2f4858;">Sender Details</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0 18px 18px 18px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:28%;">Name</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ name }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:28%;">Email</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">
+              <a href="mailto:{{ email }}" style="color:#ff6800; text-decoration:none; font-weight:600;">{{ email }}</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; margin-top:12px; border:1px solid #f1e6da; border-radius:16px; background-color:#ffffff;">
+    <tr>
+      <td style="padding:18px;">
+        <p style="margin:0 0 8px 0; font-size:14px; line-height:20px; font-weight:700; color:#2f4858;">Message</p>
+        <p style="margin:0; font-size:14px; line-height:22px; color:#405867; white-space:pre-wrap;">{{ message }}</p>
+      </td>
+    </tr>
   </table>
 {% endblock main %}

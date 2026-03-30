@@ -1,20 +1,47 @@
 {% extends "emails/base.html" %}
 
+{% block subject_title %}W4lkies Sign-In Alert{% endblock %}
+{% block preheader %}Your account was signed in successfully.{% endblock %}
+{% block eyebrow %}Account Activity{% endblock %}
+{% block heading %}New Sign-In Detected{% endblock %}
+{% block lead %}
+  This is a confirmation that your account was signed in. If this was not you, please reset your password immediately.
+{% endblock %}
+
 {% block main %}
-  <p>
-  This is just a friendly email to let you know that your account was successfully signed into.
-  <p>
-  <table>
-    <tr><td style="font-weight: bold;">User Name:</td></tr>
-    <tr><td>{{ user.name }}</td></tr>
-    <tr><td style="font-weight: bold;">User Email:</td></tr>
-    <tr><td>{{ user.email }}</td></tr>
-    <tr><td style="font-weight: bold;">Sign In At:</td></tr>
-    <tr><td>{{ request.headers.get("date") }}</dt></tr>
-    <tr><td style="font-weight: bold;">IP Address:</td></tr>
-    <tr><td>{{ request.client.host }}</td></tr>
-    <tr><td style="font-weight: bold;">User Agent:</td></tr>
-    <tr><td>{{ request.headers.get("user-agent") }}</td></tr>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border:1px solid #f1e6da; border-radius:16px; background-color:#fffaf4;">
+    <tr>
+      <td style="padding:18px 18px 8px 18px;">
+        <p style="margin:0; font-size:14px; line-height:20px; font-weight:700; color:#2f4858;">Sign-in Details</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0 18px 18px 18px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:34%;">User Name</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ user.name }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:34%;">Email</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">
+              <a href="mailto:{{ user.email }}" style="color:#ff6800; text-decoration:none; font-weight:600;">{{ user.email }}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:34%;">Sign-In At</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ request.headers.get("date") or "Unavailable" }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:34%;">IP Address</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ request.client.host if request.client else "Unavailable" }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:34%;">User Agent</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ request.headers.get("user-agent") or "Unavailable" }}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
   </table>
 {% endblock main %}
-

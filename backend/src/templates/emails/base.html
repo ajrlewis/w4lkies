@@ -1,63 +1,71 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <style type="text/css">
-      .container {
-        color: #1a1a1a;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        margin-left: 14px;
-        margin-right: 14px;
-        padding-top: 30px;
-        padding-bottom: 30px;
-      }
-
-      h2 {
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 20px;
-      }
-
-      h3 {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      h4 {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      table {
-        font-weight: normal;
-        margin-bottom: 10px;
-        width: 100%;
-      }
-
-      tr {
-      }
-
-      td {
-        vertical-align: top;
-        padding-bottom: 10px;
-        width: 100%;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block subject_title %}W4lkies{% endblock %}</title>
   </head>
-  <body>
-    <div class="container">
-      <header>
-        {% include "logo.html" %}
-      </header>
-      <br>
-      <br>
-      <main>
-        {% block main %}{% endblock main %}  
-      </main>
-    </div>
+  <body style="margin:0; padding:0; background-color:#f7f4ef; color:#2f4858; font-family:'Manrope','Inter','Segoe UI','Helvetica Neue',Arial,sans-serif;">
+    <span style="display:none!important; visibility:hidden; opacity:0; color:transparent; height:0; width:0; overflow:hidden; mso-hide:all;">
+      {% block preheader %}W4lkies update{% endblock %}
+    </span>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; background-color:#f7f4ef;">
+      <tr>
+        <td align="center" style="padding:28px 12px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; max-width:640px;">
+            <tr>
+              <td style="background-color:#ffffff; border:1px solid #f1e6da; border-radius:22px; overflow:hidden; box-shadow:0 16px 36px -28px rgba(31, 41, 55, 0.55);">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
+                  <tr>
+                    <td style="height:8px; line-height:8px; font-size:0; background-color:#ff9636;">&nbsp;</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:26px 28px 8px 28px;">
+                      <div style="display:inline-block; padding:8px 14px; border:1px solid #f7ddbf; border-radius:999px; background-color:#fff8ef;">
+                        {% include "logo.html" %}
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:6px 28px 4px 28px;">
+                      <p style="margin:0 0 10px 0; font-size:12px; line-height:16px; letter-spacing:0.12em; text-transform:uppercase; color:#ff6800; font-weight:700;">
+                        {% block eyebrow %}W4lkies{% endblock %}
+                      </p>
+                      <h1 style="margin:0; font-size:28px; line-height:34px; color:#2f4858; font-family:'Fraunces','Georgia','Times New Roman',serif; font-weight:700;">
+                        {% block heading %}Notification{% endblock %}
+                      </h1>
+                      <p style="margin:12px 0 0 0; font-size:15px; line-height:24px; color:#4f6472;">
+                        {% block lead %}Here is your latest update from W4lkies.{% endblock %}
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:22px 28px 8px 28px;">
+                      {% block main %}{% endblock main %}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:18px 28px 28px 28px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
+                        <tr>
+                          <td style="border-top:1px solid #f2e7db; padding-top:14px; font-size:12px; line-height:18px; color:#7b8a97;">
+                            W4lkies · Trusted dog walking and pet care updates.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

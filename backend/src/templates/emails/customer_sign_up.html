@@ -1,52 +1,111 @@
 {% extends "emails/base.html" %}
 
+{% block subject_title %}W4lkies Customer Sign-Up{% endblock %}
+{% block preheader %}A new customer sign-up was submitted on W4lkies.{% endblock %}
+{% block eyebrow %}Sign-Up Received{% endblock %}
+{% block heading %}New Customer Registration{% endblock %}
+{% block lead %}
+  A new customer has submitted their details and dog information.
+{% endblock %}
+
 {% block main %}
-  <h2>👤📋 Customer Information 👤📋</h2>
-  <table>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border:1px solid #f1e6da; border-radius:16px; background-color:#fffaf4;">
     <tr>
-      <td>
-        <p>Customer Name:</p>
-        <p>{{ customer.name }}</p>
-        <p>Customer Phone:</p>
-        <p>{{ customer.phone }}</p>
-        <p>Customer Email:</p>
-        <p><a href="mailto:{{ customer.email }}">{{ customer.email }}</a></p>
-        <p>Customer Emergency Contact Name:</p>
-        <p>{{ customer.emergency_contact_name }}</p>
-        <p>Customer Emergency Contact Phone:</p>
-        <p>{{ customer.emergency_contact_phone }}</p>
+      <td style="padding:18px 18px 8px 18px;">
+        <p style="margin:0; font-size:14px; line-height:20px; font-weight:700; color:#2f4858;">Customer Details</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0 18px 18px 18px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:38%;">Customer Name</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ customer.name }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:38%;">Phone</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ customer.phone }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:38%;">Email</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">
+              <a href="mailto:{{ customer.email }}" style="color:#ff6800; text-decoration:none; font-weight:600;">{{ customer.email }}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:38%;">Emergency Contact Name</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ customer.emergency_contact_name }}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:38%;">Emergency Contact Phone</td>
+            <td style="padding:10px 0; border-top:1px solid #f3e7d9; font-size:14px; line-height:20px; color:#2f4858;">{{ customer.emergency_contact_phone }}</td>
+          </tr>
+        </table>
       </td>
     </tr>
   </table>
-  <h2>🐾🐶 Dog Information 🐾🐶</h2>
-  <table>
-    {% for dog in dogs %}
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; margin-top:12px;">
+    <tr>
+      <td style="padding:0;">
+        <p style="margin:0 0 8px 0; font-size:14px; line-height:20px; font-weight:700; color:#2f4858;">Dog Details</p>
+      </td>
+    </tr>
+  </table>
+
+  {% for dog in dogs %}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; margin-top:8px; border:1px solid #f1e6da; border-radius:16px; background-color:#ffffff;">
       <tr>
-        <td>
-          <p>Name:</p>
-          <p>{{ dog.name }}</p>
-          <p>Breed:</p>
-          <p>{{ dog.breed }}</p>
-          <p>Date of Birth:</p>
-          <p>{{ dog.date_of_birth }}</p>
-          <p>Vet:</p>
-          <p>{{ dog.vet_name }}, {{ dog.vet_address }}</p>
-          <p>Is allowed treats?</p>
-          <p>{{ dog.is_allowed_treats }}</p>
-          <p>Is allowed off the lead?</p>
-          <p>{{ dog.is_allowed_off_the_lead }}</p>
-          <p>Is allowed on Instagram (@w4lkies) or this website (w4lkies.com)?</p>
-          <p>{{ dog.is_allowed_on_social_media }}</p>
-          <p>Is neutered or spayed?</p>
-          <p>{{ dog.is_neutered_or_spayed }}</p>
-          <p>Behavioral Issues:</p>
-          <p>{{ dog.behavioral_issues }}</p>
-          <p>Medical Needs:</p>
-          <p>{{ dog.medical_needs }}</p>
+        <td style="padding:14px 18px 6px 18px;">
+          <p style="margin:0; font-size:14px; line-height:20px; font-weight:700; color:#2f4858;">Dog {{ loop.index }}</p>
         </td>
       </tr>
-
-      
-    {% endfor %}
-  </table>
+      <tr>
+        <td style="padding:0 18px 18px 18px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; border-collapse:collapse;">
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Name</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.name }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Breed</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.breed }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Date of Birth</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.date_of_birth }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Vet</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.vet_name }}, {{ dog.vet_address }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Allowed Treats</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.is_allowed_treats }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Allowed Off Lead</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.is_allowed_off_the_lead }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Allowed On Social Media</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.is_allowed_on_social_media }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Neutered / Spayed</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.is_neutered_or_spayed }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Behavioral Issues</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.behavioral_issues }}</td>
+            </tr>
+            <tr>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:13px; line-height:18px; font-weight:700; color:#5d7180; width:42%;">Medical Needs</td>
+              <td style="padding:9px 0; border-top:1px solid #eef0f3; font-size:14px; line-height:20px; color:#2f4858;">{{ dog.medical_needs }}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  {% endfor %}
 {% endblock main %}
