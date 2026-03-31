@@ -148,7 +148,6 @@ def generate_invoice_data(
     days_due = 7
     period_start = _to_date(date_start)
     period_end = _to_date(date_end)
-    period_end_exclusive = period_end + timedelta(days=1)
 
     # Get unique reference for invoice
     reference_hash = (
@@ -168,7 +167,8 @@ def generate_invoice_data(
         pagination_params=None,
         response=None,
         date_min=period_start,
-        date_max=period_end_exclusive,
+        date_max=period_end,
+        date_max_inclusive=True,
         customer_id=customer_id,
     )
 
@@ -219,12 +219,11 @@ def generate_invoices_for_all_customers(
 ) -> dict:
     period_start = _to_date(date_start)
     period_end = _to_date(date_end)
-    period_end_exclusive = period_end + timedelta(days=1)
 
     customer_rows = (
         db.query(Booking.customer_id)
         .filter(Booking.date >= period_start)
-        .filter(Booking.date < period_end_exclusive)
+        .filter(Booking.date <= period_end)
         .distinct()
         .order_by(Booking.customer_id.asc())
         .all()

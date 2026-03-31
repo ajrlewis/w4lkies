@@ -271,6 +271,45 @@ async def test_invoices_admin_routes(
     assert mark_paid_response.json()["date_paid"] is not None
 
 
+async def test_invoice_generation_includes_start_and_end_dates(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    for booking_date, booking_time in (
+        ("2025-03-01T00:00:00+00:00", "09:00:00"),
+        ("2025-03-31T00:00:00+00:00", "10:00:00"),
+        ("2025-04-01T00:00:00+00:00", "11:00:00"),
+    ):
+        create_response = await async_client.post(
+            "/bookings/",
+            headers=admin_headers,
+            json={
+                "date": booking_date,
+                "time": booking_time,
+                "customer_id": 2,
+                "service_id": 1,
+                "user_id": 2,
+            },
+        )
+        assert create_response.status_code == 200, create_response.text
+
+    generate_response = await async_client.post(
+        "/invoices/generate",
+        headers=admin_headers,
+        json={
+            "customer_id": 2,
+            "date_start": "2025-03-01T00:00:00+00:00",
+            "date_end": "2025-03-31T00:00:00+00:00",
+        },
+    )
+    assert generate_response.status_code == 200, generate_response.text
+    generated_invoice = generate_response.json()
+    booking_dates = {booking["date"][:10] for booking in generated_invoice["bookings"]}
+
+    assert "2025-03-01" in booking_dates
+    assert "2025-03-31" in booking_dates
+    assert "2025-04-01" not in booking_dates
+
+
 async def test_expenses_crud(
     async_client: httpx.AsyncClient,
     admin_headers: dict[str, str],

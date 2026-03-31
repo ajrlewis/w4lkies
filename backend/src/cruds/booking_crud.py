@@ -88,6 +88,7 @@ def get_bookings(
     search: Optional[str] = None,
     date_min: Optional[str] = None,
     date_max: Optional[str] = None,
+    date_max_inclusive: bool = False,
     order_by: Optional[tuple] = (Booking.date.desc(), Booking.time.asc()),
 ) -> dict:
     query = db.query(Booking)
@@ -107,7 +108,10 @@ def get_bookings(
     if date_min:
         query = query.filter(Booking.date >= date_min)
     if date_max:
-        query = query.filter(Booking.date < date_max)
+        if date_max_inclusive:
+            query = query.filter(Booking.date <= date_max)
+        else:
+            query = query.filter(Booking.date < date_max)
     if order_by:
         query = query.order_by(*order_by)
     if pagination_params is not None and response is not None:
