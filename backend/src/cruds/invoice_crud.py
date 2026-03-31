@@ -170,6 +170,7 @@ def generate_invoice_data(
         date_max=period_end,
         date_max_inclusive=True,
         customer_id=customer_id,
+        order_by=(Booking.date.asc(), Booking.time.asc(), Booking.booking_id.asc()),
     )
 
     # Get the total price of the bookings
@@ -238,6 +239,9 @@ def generate_invoices_for_all_customers(
         uninvoiced_bookings = [
             booking for booking in invoice_data.get("bookings", []) if booking.invoice_id is None
         ]
+        uninvoiced_bookings.sort(
+            key=lambda booking: (booking.date, booking.time, booking.booking_id)
+        )
         if not uninvoiced_bookings:
             skipped_customers += 1
             continue

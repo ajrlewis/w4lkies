@@ -310,6 +310,48 @@ async def test_invoice_generation_includes_start_and_end_dates(
     assert "2025-04-01" not in booking_dates
 
 
+async def test_invoice_generation_returns_bookings_sorted_ascending(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    customer = await _create_customer(async_client, admin_headers)
+    customer_id = customer["customer_id"]
+
+    for booking_date, booking_time in (
+        ("2025-03-15T00:00:00+00:00", "11:00:00"),
+        ("2025-03-10T00:00:00+00:00", "15:00:00"),
+        ("2025-03-15T00:00:00+00:00", "09:00:00"),
+    ):
+        create_response = await async_client.post(
+            "/bookings/",
+            headers=admin_headers,
+            json={
+                "date": booking_date,
+                "time": booking_time,
+                "customer_id": customer_id,
+                "service_id": 1,
+                "user_id": 2,
+            },
+        )
+        assert create_response.status_code == 200, create_response.text
+
+    generate_response = await async_client.post(
+        "/invoices/generate",
+        headers=admin_headers,
+        json={
+            "customer_id": customer_id,
+            "date_start": "2025-03-01T00:00:00+00:00",
+            "date_end": "2025-03-31T00:00:00+00:00",
+        },
+    )
+    assert generate_response.status_code == 200, generate_response.text
+    generated_invoice = generate_response.json()
+
+    booking_order = [
+        (booking["date"][:10], booking["time"][:8]) for booking in generated_invoice["bookings"]
+    ]
+    assert booking_order == sorted(booking_order)
+
+
 async def test_expenses_crud(
     async_client: httpx.AsyncClient,
     admin_headers: dict[str, str],

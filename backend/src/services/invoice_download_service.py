@@ -326,7 +326,8 @@ def _create(invoice):
     y = _draw_header(pdf, invoice, width, height)
     y = _draw_bill_to_block(pdf, invoice, width, y)
 
-    booking_chunks = chunk_bookings(list(invoice.bookings))
+    sorted_bookings = _sort_bookings(list(invoice.bookings))
+    booking_chunks = chunk_bookings(sorted_bookings)
     if not booking_chunks:
         booking_chunks = [[]]
 
@@ -379,6 +380,17 @@ def chunk_bookings(bookings: list) -> list:
         chunks.append(bookings[:services_per_page])
         bookings = bookings[services_per_page:]
     return chunks
+
+
+def _sort_bookings(bookings: list) -> list:
+    return sorted(
+        bookings,
+        key=lambda booking: (
+            booking.date,
+            booking.time,
+            booking.booking_id if hasattr(booking, "booking_id") else 0,
+        ),
+    )
 
 
 def create(invoice):
