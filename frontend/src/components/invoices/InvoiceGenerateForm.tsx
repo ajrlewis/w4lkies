@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { generateInvoice, generateInvoicesForAllCustomers } from "@/api/invoiceRequests";
 import { fetchActiveCustomers } from "@/api/customerRequests";
 import { toast } from "@/components/ui/sonner";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 interface InvoiceGenerateFormProps {
   onCancel: () => void;
@@ -135,6 +136,7 @@ const InvoiceGenerateForm = ({ onCancel, onSuccess }: InvoiceGenerateFormProps) 
           type="button"
           variant="outline"
           onClick={onCancel}
+          disabled={isGenerating}
         >
           Cancel
         </Button>
@@ -142,11 +144,16 @@ const InvoiceGenerateForm = ({ onCancel, onSuccess }: InvoiceGenerateFormProps) 
           type="submit"
           disabled={isGenerating}
         >
-          {isGenerating
-            ? "Generating..."
-            : selectedCustomerId === "all"
-              ? "Generate All Invoices"
-              : "Generate Invoice"}
+          {isGenerating ? (
+            <>
+              <LoadingSpinner className="mr-2 h-4 w-4" />
+              {selectedCustomerId === "all" ? "Generating All..." : "Generating..."}
+            </>
+          ) : selectedCustomerId === "all" ? (
+            "Generate All Invoices"
+          ) : (
+            "Generate Invoice"
+          )}
         </Button>
       </div>
     </form>

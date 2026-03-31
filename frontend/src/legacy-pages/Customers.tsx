@@ -37,6 +37,7 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationInfo from "@/components/pagination/PaginationInfo";
 import { DEFAULT_PAGINATION, type PaginationInfo as PaginationInfoType } from "@/types/interfaces";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Customers = () => {
   const { isAdmin } = useAuth();
@@ -374,14 +375,22 @@ const Customers = () => {
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteCustomerMutation.isPending || !customerToDelete}
-              onClick={async () => {
+              onClick={async (event) => {
+                event.preventDefault();
                 if (!customerToDelete) {
                   return;
                 }
                 await deleteCustomerMutation.mutateAsync(customerToDelete.customer_id);
               }}
             >
-              {deleteCustomerMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteCustomerMutation.isPending ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

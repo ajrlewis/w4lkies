@@ -34,6 +34,7 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationInfo from "@/components/pagination/PaginationInfo";
 import { DEFAULT_PAGINATION, type PaginationInfo as PaginationInfoType } from "@/types/interfaces";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Vets = () => {
   const { isAdmin } = useAuth();
@@ -315,14 +316,22 @@ const Vets = () => {
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteVetMutation.isPending || !vetToDelete}
-              onClick={async () => {
+              onClick={async (event) => {
+                event.preventDefault();
                 if (!vetToDelete) {
                   return;
                 }
                 await deleteVetMutation.mutateAsync(vetToDelete.vet_id);
               }}
             >
-              {deleteVetMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteVetMutation.isPending ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

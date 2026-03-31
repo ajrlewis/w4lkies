@@ -8,6 +8,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { remove } from "@/api/apiService";
 import { toast } from "@/components/ui/sonner";
 import ExpenseEditForm from "./ExpenseEditForm";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Expense {
   expense_id: number;
@@ -26,6 +37,7 @@ const ExpenseCard = ({ expense, onUpdate }: ExpenseCardProps) => {
   const { isAdmin } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -41,18 +53,16 @@ const ExpenseCard = ({ expense, onUpdate }: ExpenseCardProps) => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) {
-      return;
-    }
-
     setIsDeleting(true);
     try {
       await remove("expenses", expense.expense_id.toString());
       toast.success("Expense deleted successfully");
       onUpdate();
+      return true;
     } catch (error) {
       toast.error("Failed to delete expense");
       console.error("Error deleting expense:", error);
+      return false;
     } finally {
       setIsDeleting(false);
     }
@@ -132,15 +142,56 @@ const ExpenseCard = ({ expense, onUpdate }: ExpenseCardProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteConfirmation(true)}
             disabled={isDeleting}
             className="flex items-center gap-1 hover:text-red-500"
           >
-            <Trash2 className="h-4 w-4" />
+            {isDeleting ? <LoadingSpinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
             {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </CardFooter>
       )}
+
+      <AlertDialog
+        open={showDeleteConfirmation}
+        onOpenChange={(open) => {
+          if (!isDeleting) {
+            setShowDeleteConfirmation(open);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete expense?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes this expense entry. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+              onClick={async (event) => {
+                event.preventDefault();
+                const deleted = await handleDelete();
+                if (deleted) {
+                  setShowDeleteConfirmation(false);
+                }
+              }}
+            >
+              {isDeleting ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

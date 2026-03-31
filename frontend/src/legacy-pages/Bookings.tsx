@@ -56,6 +56,7 @@ import {
 import { groupBookingsByDate, mapBookingToEnhanced } from "@/components/bookings/utils/bookingTransformations";
 import { useSearchReset } from "@/hooks/useSearchReset";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 type BookingViewMode = "upcoming" | "history";
 
@@ -643,7 +644,8 @@ const Bookings = () => {
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteBookingMutation.isPending || !bookingToDelete}
-              onClick={async () => {
+              onClick={async (event) => {
+                event.preventDefault();
                 if (!bookingToDelete) {
                   return;
                 }
@@ -657,7 +659,14 @@ const Bookings = () => {
                 await deleteBookingMutation.mutateAsync(bookingIds);
               }}
             >
-              {deleteBookingMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteBookingMutation.isPending ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

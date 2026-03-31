@@ -36,6 +36,7 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationInfo from "@/components/pagination/PaginationInfo";
 import { DEFAULT_PAGINATION, type PaginationInfo as PaginationInfoType } from "@/types/interfaces";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Dogs = () => {
   const { isAdmin } = useAuth();
@@ -402,14 +403,22 @@ const Dogs = () => {
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteDogMutation.isPending || !dogToDelete}
-              onClick={async () => {
+              onClick={async (event) => {
+                event.preventDefault();
                 if (!dogToDelete) {
                   return;
                 }
                 await deleteDogMutation.mutateAsync(dogToDelete.dog_id);
               }}
             >
-              {deleteDogMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteDogMutation.isPending ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

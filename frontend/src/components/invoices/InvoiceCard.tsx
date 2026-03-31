@@ -12,6 +12,17 @@ import ManagementCard from "@/components/admin/ManagementCard";
 import { Button } from "@/components/ui/button";
 import { downloadInvoice } from "@/api/invoiceRequests";
 import { toast } from "@/components/ui/sonner";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -35,6 +46,7 @@ const InvoiceCard = ({ invoice, onDelete, isAdmin }: InvoiceCardProps) => {
   const [showBookings, setShowBookings] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const isPaid = invoice.date_paid !== null;
   const bookingCount = invoice.bookings?.length || 0;
@@ -54,14 +66,16 @@ const InvoiceCard = ({ invoice, onDelete, isAdmin }: InvoiceCardProps) => {
 
   const handleDelete = async () => {
     if (!onDelete) {
-      return;
+      return false;
     }
     setIsDeleting(true);
     try {
       await onDelete(invoice.invoice_id);
       toast.success("Invoice deleted successfully");
+      return true;
     } catch (error) {
       toast.error("Failed to delete invoice");
+      return false;
     } finally {
       setIsDeleting(false);
     }
@@ -79,10 +93,10 @@ const InvoiceCard = ({ invoice, onDelete, isAdmin }: InvoiceCardProps) => {
             size="icon"
             className="h-8 w-8"
             onClick={handleDownload}
-            disabled={isDownloading}
+            disabled={isDownloading || isDeleting}
             aria-label={`Download ${invoice.reference}`}
           >
-            <Download className="h-4 w-4" />
+            {isDownloading ? <LoadingSpinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
           </Button>
           {isAdmin && onDelete ? (
             <Button
@@ -90,11 +104,11 @@ const InvoiceCard = ({ invoice, onDelete, isAdmin }: InvoiceCardProps) => {
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isDeleting || isDownloading}
               aria-label={`Delete ${invoice.reference}`}
             >
-              <Trash2 className="h-4 w-4" />
+              {isDeleting ? <LoadingSpinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
             </Button>
           ) : null}
         </div>
@@ -154,6 +168,47 @@ const InvoiceCard = ({ invoice, onDelete, isAdmin }: InvoiceCardProps) => {
           </div>
         ) : null}
       </div>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!isDeleting) {
+            setIsDeleteDialogOpen(open);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes {invoice.reference}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+              onClick={async (event) => {
+                event.preventDefault();
+                const deleted = await handleDelete();
+                if (deleted) {
+                  setIsDeleteDialogOpen(false);
+                }
+              }}
+            >
+              {isDeleting ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ManagementCard>
   );
 };

@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 interface CustomerCardProps {
   customer: Customer;
@@ -167,8 +168,17 @@ const CustomerCard = ({ customer, onUpdate }: CustomerCardProps) => {
             disabled={isDeleting}
             className="flex items-center gap-1"
           >
-            <Trash2 className="h-4 w-4" />
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? (
+              <>
+                <LoadingSpinner className="h-4 w-4" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </>
+            )}
           </Button>
         </CardFooter>
       )}
@@ -184,11 +194,21 @@ const CustomerCard = ({ customer, onUpdate }: CustomerCardProps) => {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDeleteConfirm} 
+              onClick={async (event) => {
+                event.preventDefault();
+                await handleDeleteConfirm();
+              }}
               className="bg-red-600 hover:bg-red-700"
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

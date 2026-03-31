@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DEFAULT_PAGINATION, type PaginationInfo as PaginationInfoType } from "@/types/interfaces";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 interface Expense {
   expense_id: number;
@@ -397,14 +398,22 @@ const Expenses = () => {
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteExpenseMutation.isPending || !expenseToDelete}
-              onClick={async () => {
+              onClick={async (event) => {
+                event.preventDefault();
                 if (!expenseToDelete) {
                   return;
                 }
                 await deleteExpenseMutation.mutateAsync(expenseToDelete.expense_id);
               }}
             >
-              {deleteExpenseMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteExpenseMutation.isPending ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
