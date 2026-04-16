@@ -83,6 +83,11 @@ def _sample_contexts() -> dict[str, dict]:
             "dogs": dogs,
             "request": request,
         },
+        "emails/admin_customer_sign_up.html": {
+            "customer": customer,
+            "dogs": dogs,
+            "request": request,
+        },
     }
 
 

@@ -1,21 +1,11 @@
 import { useState, useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useQuery } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/api/apiService";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Stethoscope } from "lucide-react";
 
 interface Vet {
   vet_id: number;
@@ -46,7 +36,6 @@ const VetSelector = ({ form, index }: VetSelectorProps) => {
   const [isOtherSelected, setIsOtherSelected] = useState(false);
   const [otherVetName, setOtherVetName] = useState("");
   const [otherVetAddress, setOtherVetAddress] = useState("");
-  const [open, setOpen] = useState(false);
 
   const { data: vets = mockVets, isLoading, isError } = useQuery({
     queryKey: ["vets"],
@@ -83,88 +72,58 @@ const VetSelector = ({ form, index }: VetSelectorProps) => {
         control={form.control}
         name={`dogs.${index}.vet`}
         render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel className="text-foreground">Select your vet</FormLabel>
+          <FormItem>
+            <FormLabel className="flex items-center gap-1 text-foreground">
+              <Stethoscope className="h-4 w-4" />
+              Vet
+            </FormLabel>
             <FormControl>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className={cn("w-full justify-between border-border bg-background text-foreground", !field.value && "text-muted-foreground")}
-                  >
-                    {field.value
-                      ? isOtherSelected
-                        ? "Other"
-                        : displayVets.find((vet) => vet.vet_id === parseInt(field.value, 10))?.name || "Select vet"
-                      : "Select vet"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-50 border-border bg-background p-0" align="start">
-                  <Command className="bg-background text-foreground">
-                    <CommandInput placeholder="Search vet..." className="text-foreground" />
-                    <CommandList>
-                      <CommandEmpty className="text-muted-foreground">No vet found.</CommandEmpty>
-                      <CommandGroup>
-                        {isLoading ? (
-                          <CommandItem disabled className="text-muted-foreground">
-                            Loading vets...
-                          </CommandItem>
-                        ) : (
-                          <>
-                            {displayVets.map((vet) => (
-                              <CommandItem
-                                key={vet.vet_id}
-                                value={vet.name}
-                                className="cursor-pointer text-foreground aria-selected:bg-muted"
-                                onSelect={() => {
-                                  field.onChange(String(vet.vet_id));
-                                  setIsOtherSelected(false);
-                                  form.setValue(`dogs.${index}.vet_name`, vet.name);
-                                  form.setValue(`dogs.${index}.vet_address`, vet.address);
-                                  setOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4 text-primary",
-                                    field.value === String(vet.vet_id) ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex flex-col">
-                                  <span>{vet.name}</span>
-                                  <span className="text-xs text-muted-foreground">{vet.address}</span>
-                                </div>
-                              </CommandItem>
-                            ))}
-                            <CommandItem
-                              key="other"
-                              value="Other"
-                              className="cursor-pointer text-foreground aria-selected:bg-muted"
-                              onSelect={() => {
-                                setIsOtherSelected(true);
-                                field.onChange("-1");
-                                form.setValue(`dogs.${index}.vet_name`, otherVetName);
-                                form.setValue(`dogs.${index}.vet_address`, otherVetAddress);
-                                setOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4 text-primary",
-                                  isOtherSelected ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <span>Other</span>
-                            </CommandItem>
-                          </>
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Select
+                value={field.value || ""}
+                onValueChange={(value) => {
+                  field.onChange(value);
+
+                  if (value === "-1") {
+                    setIsOtherSelected(true);
+                    form.setValue(`dogs.${index}.vet_name`, otherVetName);
+                    form.setValue(`dogs.${index}.vet_address`, otherVetAddress);
+                    return;
+                  }
+
+                  setIsOtherSelected(false);
+                  const selectedVet = displayVets.find((vet) => String(vet.vet_id) === value);
+                  if (selectedVet) {
+                    form.setValue(`dogs.${index}.vet_name`, selectedVet.name);
+                    form.setValue(`dogs.${index}.vet_address`, selectedVet.address);
+                  }
+                }}
+              >
+                <SelectTrigger className="border-border bg-background text-foreground">
+                  <SelectValue placeholder="Select a vet" />
+                </SelectTrigger>
+                <SelectContent className="max-h-96 border-border bg-background text-foreground">
+                  {isLoading ? (
+                    <SelectItem value="__loading__" disabled className="cursor-default text-muted-foreground">
+                      Loading vets...
+                    </SelectItem>
+                  ) : (
+                    <>
+                      {displayVets.map((vet) => (
+                        <SelectItem
+                          key={vet.vet_id}
+                          value={String(vet.vet_id)}
+                          className="cursor-pointer text-foreground hover:bg-muted"
+                        >
+                          {vet.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="-1" className="cursor-pointer text-foreground hover:bg-muted">
+                        Other
+                      </SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
             </FormControl>
             <FormMessage />
           </FormItem>

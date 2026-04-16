@@ -5,6 +5,17 @@ import { Button } from "@/components/ui/button";
 import DogBasicInfo from "./DogBasicInfo";
 import DogPermissions from "./DogPermissions";
 import DogHealth from "./DogHealth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface DogDetailsFormProps {
   form: UseFormReturn<SignupFormData>;
@@ -29,9 +40,31 @@ const DogDetailsForm = ({ form, onAddDog, onRemoveDog }: DogDetailsFormProps) =>
           <div className="flex items-center justify-between gap-2">
             <h4 className="text-base font-semibold text-foreground sm:text-lg">Dog #{index + 1}</h4>
             {index > 0 && (
-              <Button type="button" variant="destructive" size="sm" onClick={() => onRemoveDog(index)}>
-                Remove Dog
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" variant="destructive" size="sm">
+                    Remove Dog
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove this dog?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will remove Dog #{index + 1} and all entered details for this section.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel type="button">Keep Dog</AlertDialogCancel>
+                    <AlertDialogAction
+                      type="button"
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={() => onRemoveDog(index)}
+                    >
+                      Remove Dog
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
 
@@ -44,7 +77,7 @@ const DogDetailsForm = ({ form, onAddDog, onRemoveDog }: DogDetailsFormProps) =>
       <Button
         type="button"
         onClick={onAddDog}
-        className="h-11 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90"
+        className="h-11 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90 sm:max-w-sm"
       >
         Add Another Dog
       </Button>

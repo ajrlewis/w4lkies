@@ -130,6 +130,23 @@
     animation: fadeIn 0.6s ease-out forwards;
   }
 
+  .date-input {
+    color-scheme: light;
+  }
+
+  .dark .date-input {
+    color-scheme: dark;
+  }
+
+  .date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0 !important;
+  }
+
+  .date-input::-moz-calendar-picker-indicator {
+    opacity: 0 !important;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;

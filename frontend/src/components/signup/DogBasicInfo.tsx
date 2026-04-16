@@ -12,6 +12,16 @@ interface DogBasicInfoProps {
 }
 
 const DogBasicInfo = ({ form, index }: DogBasicInfoProps) => {
+  const openDatePicker = (input: HTMLInputElement) => {
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+      } catch {
+        // no-op: browsers may block programmatic picker opening in some contexts
+      }
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -46,7 +56,17 @@ const DogBasicInfo = ({ form, index }: DogBasicInfoProps) => {
                 Date of Birth
               </FormLabel>
               <FormControl>
-                <Input type="date" {...field} className="border-border bg-background text-foreground" />
+                <div className="relative">
+                  <Input
+                    type="date"
+                    {...field}
+                    className="date-input cursor-pointer border-border bg-background pr-10 text-foreground"
+                    onClick={(event) => {
+                      openDatePicker(event.currentTarget);
+                    }}
+                  />
+                  <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

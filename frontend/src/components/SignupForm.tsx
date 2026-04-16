@@ -1,17 +1,32 @@
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { SignupFormData, signupFormSchema } from "@/types/forms";
 import { useFieldArray } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import PersonalDetailsForm from "./signup/PersonalDetailsForm";
 import DogDetailsForm from "./signup/DogDetailsForm";
 import DeclarationForm from "./signup/DeclarationForm";
 import { toast } from "@/components/ui/use-toast";
 import { API_BASE_URL } from "@/api/apiService";
-import { Card, CardContent } from "@/components/ui/card";
+
+const sectionClass =
+  "rounded-[1.7rem] border border-border/70 bg-card/95 p-5 shadow-[0_20px_40px_-30px_rgba(25,30,38,0.4)] sm:p-7";
 
 const SignupForm = () => {
+  const navigate = useNavigate();
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -83,11 +98,20 @@ const SignupForm = () => {
 
       toast({
         title: "Success!",
-        description: "Your application has been submitted.",
+        description:
+          "Your application has been submitted. Please check your inbox (and junk folder) for confirmation. Redirecting you home...",
         className: "text-black",
       });
 
       form.reset();
+
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+
+      redirectTimeoutRef.current = setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1800);
     } catch (error) {
       toast({
         title: "Error!",
@@ -123,30 +147,25 @@ const SignupForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
-        <Card className="border-border/70 bg-muted/40">
-          <CardContent className="p-4 sm:p-6">
-            <PersonalDetailsForm form={form} />
-          </CardContent>
-        </Card>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+        <section className={sectionClass}>
+          <PersonalDetailsForm form={form} />
+        </section>
 
-        <Card className="border-border/70 bg-muted/40">
-          <CardContent className="p-4 sm:p-6">
-            <DogDetailsForm form={form} onAddDog={handleAddDog} onRemoveDog={handleRemoveDog} />
-          </CardContent>
-        </Card>
+        <section className={sectionClass}>
+          <DogDetailsForm form={form} onAddDog={handleAddDog} onRemoveDog={handleRemoveDog} />
+        </section>
 
-        <Card className="border-border/70 bg-muted/40">
-          <CardContent className="p-4 sm:p-6">
-            <DeclarationForm form={form} />
-          </CardContent>
-        </Card>
+        <section className={sectionClass}>
+          <DeclarationForm form={form} />
+        </section>
 
         <Button
           type="submit"
-          className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition hover:bg-primary/90"
+          disabled={form.formState.isSubmitting}
+          className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition hover:bg-primary/90 sm:max-w-sm"
         >
-          Submit Application
+          {form.formState.isSubmitting ? "Submitting..." : "Submit Application"}
         </Button>
       </form>
     </Form>

@@ -6,6 +6,7 @@ import { UseFormReturn } from "react-hook-form";
 import { SignupFormData } from "@/types/forms";
 import { API_BASE_URL } from "@/api/apiService";
 import { useQuery } from "@tanstack/react-query";
+import { Bone } from "lucide-react";
 
 interface DogBreedSelectorProps {
   form: UseFormReturn<SignupFormData>;
@@ -49,7 +50,10 @@ const DogBreedSelector = ({ form, index }: DogBreedSelectorProps) => {
       name={`dogs.${index}.breed`}
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-foreground">Breed</FormLabel>
+          <FormLabel className="flex items-center gap-1 text-foreground">
+            <Bone className="h-4 w-4" />
+            Breed
+          </FormLabel>
           <FormControl>
             {!showCustomBreed ? (
               <Select value={field.value || ""} onValueChange={handleBreedChange}>

@@ -2,6 +2,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import { SignupFormData } from "@/types/forms";
+import { FileText, Heart } from "lucide-react";
 
 interface DogHealthProps {
   form: UseFormReturn<SignupFormData>;
@@ -16,7 +17,10 @@ const DogHealth = ({ form, index }: DogHealthProps) => {
         name={`dogs.${index}.behavioral_issues`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-foreground">Behavioral Issues</FormLabel>
+            <FormLabel className="flex items-center gap-1 text-foreground">
+              <FileText className="h-4 w-4" />
+              Behavioral Issues
+            </FormLabel>
             <FormControl>
               <Textarea
                 placeholder="Please describe any behavioral issues..."
@@ -34,7 +38,10 @@ const DogHealth = ({ form, index }: DogHealthProps) => {
         name={`dogs.${index}.medical_needs`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-foreground">Medical Needs / Allergies</FormLabel>
+            <FormLabel className="flex items-center gap-1 text-foreground">
+              <Heart className="h-4 w-4" />
+              Medical Needs / Allergies
+            </FormLabel>
             <FormControl>
               <Textarea
                 placeholder="Please describe any medical needs or allergies..."
