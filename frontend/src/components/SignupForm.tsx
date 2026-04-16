@@ -93,7 +93,8 @@ const SignupForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit form");
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to submit form");
       }
 
       toast({
@@ -113,11 +114,30 @@ const SignupForm = () => {
         navigate("/", { replace: true });
       }, 1800);
     } catch (error) {
+      const description =
+        error instanceof Error && error.message
+          ? error.message
+          : "There was an error submitting your application.";
+
       toast({
         title: "Error!",
-        description: "There was an error submitting your application.",
+        description,
         variant: "destructive",
       });
+    }
+  };
+
+  const onInvalid = () => {
+    toast({
+      title: "Please check the form",
+      description: "Complete the required fields and accept the declaration before submitting.",
+      variant: "destructive",
+    });
+
+    const firstInvalid = document.querySelector<HTMLElement>("[aria-invalid='true']");
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+      firstInvalid.focus();
     }
   };
 
@@ -147,7 +167,7 @@ const SignupForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6 sm:space-y-8">
         <section className={sectionClass}>
           <PersonalDetailsForm form={form} />
         </section>
@@ -162,7 +182,6 @@ const SignupForm = () => {
 
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
           className="h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground transition hover:bg-primary/90 sm:max-w-sm"
         >
           {form.formState.isSubmitting ? "Submitting..." : "Submit Application"}
