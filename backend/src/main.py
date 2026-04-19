@@ -14,6 +14,7 @@ from routers import (
     booking_router,
     invoice_router,
     expense_router,
+    finance_router,
     # income_statement_router,
 )
 
@@ -70,6 +71,7 @@ app.include_router(service_router)
 app.include_router(booking_router)
 app.include_router(invoice_router)
 app.include_router(expense_router)
+app.include_router(finance_router)
 # app.include_router(income_statement_router)
 
 

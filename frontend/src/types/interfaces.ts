@@ -161,3 +161,63 @@ export const DEFAULT_PAGINATION: PaginationInfo = {
   next_page: null,
   prev_page: null
 };
+
+export interface FinanceMatchSuggestion {
+  entity_type: "invoice" | "expense";
+  entity_id: number;
+  label: string;
+  amount: number;
+  confidence: number;
+}
+
+export interface BankTransaction {
+  bank_transaction_id: number;
+  transaction_date: string;
+  amount: number;
+  currency: string | null;
+  description: string | null;
+  counterparty: string | null;
+  transaction_type: string | null;
+  status: string | null;
+  external_id: string | null;
+  raw_reference: string | null;
+  matched_invoice_id: number | null;
+  matched_expense_id: number | null;
+  matched_at: string | null;
+  match_method: string | null;
+  match_confidence: number | null;
+  match_note: string | null;
+  matched_label: string | null;
+  suggestions: FinanceMatchSuggestion[];
+}
+
+export interface BankStatementImport {
+  bank_statement_import_id: number;
+  source: string;
+  file_name: string;
+  file_type: string;
+  currency: string | null;
+  date_start: string | null;
+  date_end: string | null;
+  transaction_count: number;
+  imported_at: string;
+  imported_by: number;
+  matched_count: number;
+  unmatched_count: number;
+}
+
+export interface BankImportResult {
+  statement_import: BankStatementImport;
+  transactions_created: number;
+  auto_matched: number;
+}
+
+export interface BankImportSummary {
+  total_transactions: number;
+  matched_transactions: number;
+  unmatched_transactions: number;
+  total_inflows: number;
+  total_outflows: number;
+  period_start: string | null;
+  period_end: string | null;
+}

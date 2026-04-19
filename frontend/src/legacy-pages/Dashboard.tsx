@@ -10,6 +10,7 @@ import {
   FileText,
   Wallet,
   KeyRound,
+  Link2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +27,7 @@ const Dashboard = () => {
             { name: "Bookings", icon: Calendar, path: "/dashboard/bookings" },
             { name: "Invoices", icon: FileText, path: "/dashboard/invoices" },
             { name: "Expenses", icon: Wallet, path: "/dashboard/expenses" },
+            { name: "Reconciliation", icon: Link2, path: "/dashboard/reconciliation" },
           ],
         },
         {

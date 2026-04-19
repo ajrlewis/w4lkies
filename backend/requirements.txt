@@ -8,5 +8,6 @@ PyJWT
 loguru
 jinja2
 reportlab
+openpyxl
 pytest
 pytest-cov

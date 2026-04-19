@@ -19,6 +19,7 @@ import Dogs from "./legacy-pages/Dogs";
 import Services from "./legacy-pages/Services";
 import Invoices from "./legacy-pages/Invoices";
 import Expenses from "./legacy-pages/Expenses";
+import Reconciliation from "./legacy-pages/Reconciliation";
 import PayUs from "./legacy-pages/PayUs"; 
 import PaymentSuccess from "./legacy-pages/PaymentSuccess";
 import Account from "./legacy-pages/Account";
@@ -96,6 +97,12 @@ const App = () => (
             <Route path="/dashboard/expenses" element={
               <ProtectedRoute requireAdmin>
                 <Expenses />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/dashboard/reconciliation" element={
+              <ProtectedRoute requireAdmin>
+                <Reconciliation />
               </ProtectedRoute>
             } />
 

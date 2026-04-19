@@ -7,6 +7,7 @@ from routers.service_router import service_router
 from routers.booking_router import booking_router
 from routers.invoice_router import invoice_router
 from routers.expense_router import expense_router
+from routers.finance_router import finance_router
 from routers.income_statement_router import income_statement_router
 
 from routers.contact_us_router import contact_us_router
