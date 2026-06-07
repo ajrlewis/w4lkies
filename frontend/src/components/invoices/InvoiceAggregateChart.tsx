@@ -2,7 +2,7 @@
 import { Invoice } from "@/types/interfaces";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, BarChart, Bar, CartesianGrid } from "recharts";
-import { format, parseISO, eachMonthOfInterval, subMonths } from "date-fns";
+import { format, parseISO, eachMonthOfInterval, subMonths, startOfMonth } from "date-fns";
 
 interface InvoiceAggregateChartProps {
   invoices: Invoice[];
@@ -13,8 +13,14 @@ const InvoiceAggregateChart = ({ invoices }: InvoiceAggregateChartProps) => {
   const generateChartData = () => {
     if (!invoices.length) return [];
 
-    // Get the date range (last 12 months)
-    const endDate = new Date();
+    // Get the latest invoiced service month, avoiding trailing zero-value months
+    // when invoices have not been generated yet.
+    const endDate = startOfMonth(
+      invoices.reduce((latestDate, invoice) => {
+        const invoiceDate = parseISO(invoice.date_start);
+        return invoiceDate > latestDate ? invoiceDate : latestDate;
+      }, parseISO(invoices[0].date_start))
+    );
     const startDate = subMonths(endDate, 11);
     
     const months = eachMonthOfInterval({ start: startDate, end: endDate });
