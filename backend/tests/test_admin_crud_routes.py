@@ -103,6 +103,126 @@ async def test_customers_crud_and_auth(
     assert not_found_response.status_code == 404
 
 
+async def test_customer_deactivation_anonymizes_and_preserves_relationships(
+    async_client: httpx.AsyncClient, admin_headers: dict[str, str]
+):
+    first_customer = await _create_customer(async_client, admin_headers)
+    second_customer = await _create_customer(async_client, admin_headers)
+    vet = await _create_vet(async_client, admin_headers)
+
+    dog_response = await async_client.post(
+        "/dogs/",
+        headers=admin_headers,
+        json={
+            "name": "Retained Dog",
+            "date_of_birth": _iso_now(days_offset=-365),
+            "breed": "Whippet",
+            "is_allowed_treats": True,
+            "is_allowed_off_the_lead": False,
+            "is_allowed_on_social_media": False,
+            "is_neutered_or_spayed": True,
+            "behavioral_issues": "",
+            "medical_needs": "",
+            "customer_id": first_customer["customer_id"],
+            "vet_id": vet["vet_id"],
+        },
+    )
+    assert dog_response.status_code == 200, dog_response.text
+
+    booking_response = await async_client.post(
+        "/bookings/",
+        headers=admin_headers,
+        json={
+            "date": _iso_now(days_offset=3),
+            "time": "09:45:00",
+            "customer_id": first_customer["customer_id"],
+            "service_id": 1,
+            "user_id": 2,
+        },
+    )
+    assert booking_response.status_code == 200, booking_response.text
+
+    invoice_response = await async_client.post(
+        "/invoices/generate",
+        headers=admin_headers,
+        json={
+            "customer_id": first_customer["customer_id"],
+            "date_start": _iso_now(days_offset=0),
+            "date_end": _iso_now(days_offset=7),
+        },
+    )
+    assert invoice_response.status_code == 200, invoice_response.text
+
+    original_values = {
+        first_customer[field]
+        for field in (
+            "name",
+            "phone",
+            "email",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+        )
+    }
+    deactivated_response = await async_client.put(
+        f"/customers/{first_customer['customer_id']}",
+        headers=admin_headers,
+        json={"is_active": False},
+    )
+    assert deactivated_response.status_code == 200, deactivated_response.text
+    deactivated = deactivated_response.json()
+    anonymized_fields = (
+        "name",
+        "phone",
+        "email",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+    )
+    assert deactivated["is_active"] is False
+    assert all(deactivated[field] not in original_values for field in anonymized_fields)
+
+    second_deactivated_response = await async_client.put(
+        f"/customers/{second_customer['customer_id']}",
+        headers=admin_headers,
+        json={"is_active": False},
+    )
+    assert second_deactivated_response.status_code == 200, second_deactivated_response.text
+    second_deactivated = second_deactivated_response.json()
+    assert all(
+        deactivated[field] != second_deactivated[field] for field in anonymized_fields
+    )
+
+    repeated_response = await async_client.put(
+        f"/customers/{first_customer['customer_id']}",
+        headers=admin_headers,
+        json={
+            "name": "Restored Name",
+            "phone": "Restored Phone",
+            "email": "restored@example.com",
+            "emergency_contact_name": "Restored Contact",
+            "emergency_contact_phone": "Restored Contact Phone",
+            "is_active": True,
+        },
+    )
+    assert repeated_response.status_code == 200, repeated_response.text
+    assert repeated_response.json() == deactivated
+
+    dog_detail = await async_client.get(
+        f"/dogs/{dog_response.json()['dog_id']}", headers=admin_headers
+    )
+    booking_detail = await async_client.get(
+        f"/bookings/{booking_response.json()['booking_id']}", headers=admin_headers
+    )
+    invoice_detail = await async_client.get(
+        f"/invoices/{invoice_response.json()['invoice_id']}", headers=admin_headers
+    )
+    assert dog_detail.status_code == 200
+    assert dog_detail.json()["customer_id"] == first_customer["customer_id"]
+    assert booking_detail.status_code == 200
+    assert booking_detail.json()["customer_id"] == first_customer["customer_id"]
+    assert invoice_detail.status_code == 200
+    assert invoice_detail.json()["customer"]["customer_id"] == first_customer["customer_id"]
+
+
 async def test_vets_crud(
     async_client: httpx.AsyncClient, admin_headers: dict[str, str]
 ):

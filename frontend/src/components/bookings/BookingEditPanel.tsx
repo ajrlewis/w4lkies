@@ -61,7 +61,7 @@ const BookingEditPanel = ({
   const [time, setTime] = useState("");
   const [userId, setUserId] = useState("");
   const [customerId, setCustomerId] = useState("");
-  const [extraServiceIds, setExtraServiceIds] = useState<string[]>([]);
+  const [extraServices, setExtraServices] = useState<{ id: string; serviceId: string }[]>([]);
   const [removedBookingIds, setRemovedBookingIds] = useState<number[]>([]);
   const { data: users = [] } = useActiveUsers();
   const { data: customers = [] } = useActiveCustomers();
@@ -87,7 +87,7 @@ const BookingEditPanel = ({
     setTime(booking.time_value || `${booking.time}:00`);
     setUserId(booking.user_id ? String(booking.user_id) : "");
     setCustomerId(booking.customer_id ? String(booking.customer_id) : "");
-    setExtraServiceIds([]);
+    setExtraServices([]);
     setRemovedBookingIds([]);
   }, [booking, open]);
 
@@ -119,25 +119,10 @@ const BookingEditPanel = ({
   const isFormValid = useMemo(() => {
     return date.length > 0 && time.length > 0 && userId.length > 0 && customerId.length > 0;
   }, [date, time, userId, customerId]);
-  const activeServiceNames = useMemo(() => {
-    const names = new Set<string>();
-    currentServices.forEach((service) => {
-      const isRemoved =
-        typeof service.bookingId === "number" && removedBookingIds.includes(service.bookingId);
-      if (!isRemoved) {
-        names.add(service.name.trim().toLowerCase());
-      }
-    });
-    return names;
-  }, [currentServices, removedBookingIds]);
-  const availableExtraServices = useMemo(
-    () =>
-      services.filter(
-        (service) => !activeServiceNames.has(service.name.trim().toLowerCase())
-      ),
-    [services, activeServiceNames]
-  );
-  const canSaveServiceSelection = activeCurrentServiceCount + extraServiceIds.length > 0;
+  const selectedExtraServiceIds = extraServices
+    .map((extraService) => extraService.serviceId)
+    .filter(Boolean);
+  const canSaveServiceSelection = activeCurrentServiceCount + selectedExtraServiceIds.length > 0;
 
   if (!booking) {
     return null;
@@ -221,7 +206,7 @@ const BookingEditPanel = ({
             const isRemoved =
               typeof service.bookingId === "number" && removedBookingIds.includes(service.bookingId);
             const canRemove =
-              isRemoved || activeCurrentServiceCount - 1 + extraServiceIds.length >= 1;
+              isRemoved || activeCurrentServiceCount - 1 + selectedExtraServiceIds.length >= 1;
             return (
               <div
                 key={`${service.name}-${service.bookingId ?? index}`}
@@ -269,17 +254,23 @@ const BookingEditPanel = ({
         </p>
       </div>
 
-      {availableExtraServices.length > 0 ? (
+      {services.length > 0 ? (
         <ExtraServicesSection
-          services={availableExtraServices}
-          extraServiceIds={extraServiceIds}
-          onAddExtraService={(serviceId) => {
-            if (!extraServiceIds.includes(serviceId)) {
-              setExtraServiceIds((current) => [...current, serviceId]);
-            }
-          }}
-          onRemoveExtraService={(serviceId) =>
-            setExtraServiceIds((current) => current.filter((id) => id !== serviceId))
+          services={services}
+          extraServices={extraServices}
+          onAddExtraService={() =>
+            setExtraServices((current) => [
+              ...current,
+              { id: crypto.randomUUID(), serviceId: "" },
+            ])
+          }
+          onUpdateExtraService={(id, serviceId) =>
+            setExtraServices((current) =>
+              current.map((entry) => (entry.id === id ? { ...entry, serviceId } : entry))
+            )
+          }
+          onRemoveExtraService={(id) =>
+            setExtraServices((current) => current.filter((entry) => entry.id !== id))
           }
         />
       ) : (
@@ -301,7 +292,7 @@ const BookingEditPanel = ({
             time,
             user_id: Number(userId),
             customer_id: Number(customerId),
-            additional_service_ids: extraServiceIds.map((serviceId) => Number(serviceId)),
+            additional_service_ids: selectedExtraServiceIds.map((serviceId) => Number(serviceId)),
             remove_booking_ids: removedBookingIds,
           })
         }
