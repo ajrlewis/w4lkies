@@ -70,8 +70,6 @@ def get_customers(
 
 def get_customer_by_id(db: SessionLocal, customer_id: int) -> Customer:
     customer = db.get(Customer, customer_id)
-    logger.debug(f"{customer = }")
-    logger.debug(f"{customer.email = }")
     if not customer:
         raise NotFoundError(f"Customer {customer_id} not found")
     return customer
@@ -84,9 +82,21 @@ def update_customer_by_id(
     customer_data: CustomerUpdateSchema,
 ) -> Customer:
     try:
-        logger.debug(f"{current_user = } {customer_data = }")
         customer = get_customer_by_id(db, customer_id)
         data = customer_data.model_dump(exclude_unset=True)
+
+        if data.get("is_active") is False or customer.is_active is False:
+            suffix = str(customer.customer_id)
+            customer.name = f"Anonymized Customer {suffix}"
+            customer.phone = f"anonymized-{suffix}"
+            customer.email = f"anonymized+{suffix}@example.invalid"
+            customer.emergency_contact_name = f"Anonymized Contact {suffix}"
+            customer.emergency_contact_phone = f"anonymized-{suffix}"
+            customer.is_active = False
+            customer.updated_by = current_user.user_id
+            db.commit()
+            db.refresh(customer)
+            return customer
 
         if "name" in data:
             customer.name = data["name"]
@@ -105,9 +115,8 @@ def update_customer_by_id(
         db.commit()
         db.refresh(customer)
         return customer
-    except SQLAlchemyError as e:
-        detail = f"Error updating customer: {e}"
-        logger.error(detail)
+    except SQLAlchemyError:
+        logger.exception("Error updating customer")
         db.rollback()
         raise DatabaseError("An error occurred while updating the customer.")
 
@@ -115,7 +124,6 @@ def update_customer_by_id(
 def add_customer(
     db: SessionLocal, current_user: User, customer_data: CustomerCreateSchema
 ) -> Customer:
-    logger.debug(f"{customer_data = }")
     customer = Customer(
         name=customer_data.name,
         phone=customer_data.phone,

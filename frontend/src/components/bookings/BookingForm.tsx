@@ -28,7 +28,7 @@ interface BookingFormProps {
 
 const BookingForm = ({ onSubmitted, submitLabel = "Submit Booking" }: BookingFormProps) => {
   const [additionalDates, setAdditionalDates] = useState<AdditionalDate[]>([]);
-  const [extraServiceIds, setExtraServiceIds] = useState<string[]>([]);
+  const [extraServices, setExtraServices] = useState<{ id: string; serviceId: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { timeSlots, isLoadingTimeSlots, services, customers, users } = useBookingFormData();
 
@@ -55,16 +55,19 @@ const BookingForm = ({ onSubmitted, submitLabel = "Submit Booking" }: BookingFor
       const bookingData = {
         user_id: data.user_id,
         service_id: data.service_id,
-        extra_services: data.extra_services || [],
         customer_id: data.customer_id,
         date: data.date,
         time: data.time,
       };
 
-      await submitBookings(bookingData, additionalDates, extraServiceIds);
+      await submitBookings(
+        bookingData,
+        additionalDates,
+        extraServices.map((extraService) => extraService.serviceId).filter(Boolean)
+      );
       form.reset();
       setAdditionalDates([]);
-      setExtraServiceIds([]);
+      setExtraServices([]);
       onSubmitted?.();
     } catch (error) {
       console.error("Form submission error:", error);
@@ -185,9 +188,21 @@ const BookingForm = ({ onSubmitted, submitLabel = "Submit Booking" }: BookingFor
 
         <ExtraServicesSection
           services={services || []}
-          extraServiceIds={extraServiceIds}
-          onAddExtraService={(serviceId) => setExtraServiceIds([...extraServiceIds, serviceId])}
-          onRemoveExtraService={(serviceId) => setExtraServiceIds(extraServiceIds.filter((id) => id !== serviceId))}
+          extraServices={extraServices}
+          onAddExtraService={() =>
+            setExtraServices((current) => [
+              ...current,
+              { id: crypto.randomUUID(), serviceId: "" },
+            ])
+          }
+          onUpdateExtraService={(id, serviceId) =>
+            setExtraServices((current) =>
+              current.map((entry) => (entry.id === id ? { ...entry, serviceId } : entry))
+            )
+          }
+          onRemoveExtraService={(id) =>
+            setExtraServices((current) => current.filter((entry) => entry.id !== id))
+          }
         />
 
         <BookingDateTimeSection control={form.control} timeSlots={timeSlots} />

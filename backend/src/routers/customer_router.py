@@ -81,7 +81,6 @@ async def update_customer(
     customer_data: CustomerUpdateSchema,
 ) -> CustomerSchema:
     """Updates the properties of a specific customer in the database."""
-    logger.debug(f"{customer_data = }")
     try:
         customer = customer_crud.update_customer_by_id(
             db, current_user, customer_id, customer_data
