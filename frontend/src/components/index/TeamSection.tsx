@@ -8,12 +8,6 @@ const teamMembers = [
     image: "/img/team-sophia.jpg",
     bio: "As the founder of W4lkies, a premier dog walking business in London W4, I bring a wealth of experience in the pet care industry. With a successful track record of establishing a dog walking business in Edinburgh, Scotland, I have honed my skills in providing top-notch care for furry companions. Prior to founding W4lkies, I worked as a receptionist at a veterinary clinic in Shepherd's Bush, London, where I gained valuable insights into animal care and welfare. Combining my passion for dogs with my professional expertise, I am dedicated to ensuring the well-being and happiness of every canine client. W4lkies is committed to providing reliable and loving dog walking services in the vibrant community of London W4. Let us take your four-legged friend on a safe and enjoyable adventure while you're away. Your pet's happiness is our top priority!",
   },
-  {
-    name: "Sara",
-    role: "Senior Dog Walker",
-    image: "/img/team-sara.jpg",
-    bio: "Growing up on a farm in Poland surrounded by various animals, I have always had a deep connection with pets. From chickens, pigs, horses, and cows to cats and dogs, caring for animals has been a passion of mine since childhood. After moving to Italy as a teenager, I rescued an abandoned dog and welcomed many cats into our countryside home. Now based in London for the past 10 years, I have transitioned from a career in hospitality to pursue my love for dogs. As a dedicated animal lover, I am excited to devote my time and affection to our canine companions. In my free time, I enjoy traveling, exploring new places, and taking long walks in nature.",
-  },
 ];
 
 const TeamSection = () => (
@@ -26,7 +20,7 @@ const TeamSection = () => (
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-8">
         {teamMembers.map((member) => (
           <Card
             key={member.name}
